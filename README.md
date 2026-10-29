@@ -13,7 +13,7 @@
 | `index.html` | 서비스 소개, 3단계 이용 방법, 요금제, FAQ | 3차 |
 | `login.html` | 구글·카카오 로그인(모의), 약관 동의, 사업자 정보 | 1차 |
 | `console.html` | 사용자 콘솔: 대시보드, 채널 연결(시스템 메시지 검수 요청), API 토큰, 수신 설정, 사용량, 요금제·결제, 설정, 접근 이력 | 1차, 2차 |
-| `docs.html` | 웹 API 문서 (v3 중계 규격): 상담 필수 API, 부가 기능 API, 채널 설정, 결과 코드 | 3차 |
+| `docs.html` | 웹 API 문서 (v3 중계 규격): 상담 필수 API(받기·보내기·종료), 부가 기능 API, 유료 API, 채널 설정, 결과 코드 | 3차 |
 | `admin.html` | 운영자 콘솔: 고객, 채널, 과금 집계 대조, 무료 이력, 테스트 연장, Enterprise 예외 | 4차 |
 | `terms.html` `privacy.html` | 이용약관, 개인정보 처리방침 초안 | 1차 |
 
@@ -40,8 +40,9 @@
 기존 중계 서버 v3 규격을 그대로 따른다. 중계 서버는 고객사 요청을 받아 카카오에 전달하고, 카카오 수신 콜백을 고객사 수신 도메인의 같은 경로로 전달한다. 상세는 `docs.html`.
 
 - 헤더 `X-SenderKey`(발신프로필 키, 채널별), `X-JwtToken`(API 토큰, 계정별 테스트·운영), 일부 API `X-UserKey`
-- 상담 필수: `/v3/chat/send/plain`, `/v3/chat/send/rich`, `/v3/image/upload`, `/v3/file/upload`, `/v3/chat/end`
-- 부가 기능: `/v3/chat/read`, `/v3/chat/delete`, `/v3/session`, `/v3/chat/extend(/plain|/rich)`, `/v3/profile/user/block|unblock`, `/v3/chat/endWithBot`, `/v3/chat/cert/status`
+- 상담 필수: 수신 `/message` `/reference` `/expired_session`, 발신 `/v3/chat/send/plain`, 종료 `/v3/chat/end`
+- 부가 기능: `/v3/chat/send/rich`, `/v3/image/upload`, `/v3/file/upload`, `/v3/chat/read`, `/v3/chat/delete`, `/v3/session`, `/v3/profile/user/block|unblock`, `/v3/chat/endWithBot`
+- 유료: `/v3/chat/extend(/plain|/rich)`, 개인정보 동의(`PERSONAL`, `/personal_info`), 본인 인증(`KAKAO_CERT`, `/cert_result`, `/v3/chat/cert/status`)
 - 수신: 필수 `/message`, `/reference`, `/expired_session`, 선택 `/personal_info`, `/cert_result`, `/seen_info`
 - 수신 서명 `X-Signature`: 클레임 `{ jwtToken: API 토큰 }`을 고객사별 Channel Secret으로 서명한 HS256 JWT
 - 응답 `{ code, message, created_at }`, `code` 0이 성공
