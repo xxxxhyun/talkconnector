@@ -3,52 +3,61 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TalkConnector API 문서</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%232f5bea%22/%3E%3Cpath d=%22M6 16h7M19 16h7%22 stroke=%22white%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%223.5%22 fill=%22none%22 stroke=%22white%22 stroke-width=%223%22/%3E%3C/svg%3E">
+<title>톡커넥터 API 문서</title>
+<link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
+<body class="app">
 <div id="header"></div>
 <div class="shell">
 <aside class="sidebar" id="sidebar">
+  <label class="side-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="search" id="docSearch" placeholder="문서 검색" aria-label="문서 검색"><kbd>/</kbd></label>
   <div class="group">시작하기</div>
-  <a href="#overview">개요</a>
-  <a href="#prepare">연동 준비</a>
-  <a href="#common">공통 규칙</a>
+  <a href="#overview" data-i="sparkle">개요</a>
+  <a href="#prepare" data-i="rocket">연동 준비</a>
+  <a href="#common" data-i="rules">공통 규칙</a>
   <div class="group">상담 필수 API</div>
-  <a href="#send-plain">메시지 보내기</a>
-  <a href="#send-rich">리치 메시지 보내기</a>
-  <a href="#upload">파일 업로드</a>
-  <a href="#end">상담 종료</a>
-  <a href="#receive">메시지 받기</a>
-  <a href="#signature">서명 검증</a>
-  <div class="group">부가 기능 API (선택)</div>
-  <a href="#read">읽음 처리</a>
-  <a href="#delete">메시지 삭제</a>
-  <a href="#session">세션 조회</a>
-  <a href="#extend">세션 연장</a>
-  <a href="#block">고객 차단</a>
-  <a href="#end-bot">봇 전환 종료</a>
-  <a href="#personal">개인정보 동의·본인 인증</a>
+  <a href="#send-plain" data-i="send">메시지 보내기</a>
+  <a href="#send-rich" data-i="layers">리치 메시지 보내기</a>
+  <a href="#upload" data-i="upload">파일 업로드</a>
+  <a href="#end" data-i="stop">상담 종료</a>
+  <a href="#receive" data-i="download">메시지 받기</a>
+  <a href="#signature" data-i="lock">서명 검증</a>
+  <div class="group">부가 기능 API</div>
+  <a href="#read" data-i="eye">읽음 처리 <span class="tag">선택</span></a>
+  <a href="#delete" data-i="trash">메시지 삭제 <span class="tag">선택</span></a>
+  <a href="#session" data-i="search">세션 조회 <span class="tag">선택</span></a>
+  <a href="#extend" data-i="clock">세션 연장 <span class="tag">선택</span></a>
+  <a href="#block" data-i="ban">고객 차단 <span class="tag">선택</span></a>
+  <a href="#end-bot" data-i="bot">봇 전환 종료 <span class="tag">선택</span></a>
+  <a href="#personal" data-i="idcard">개인정보·본인 인증 <span class="tag">선택</span></a>
   <div class="group">채널 설정 (콘솔)</div>
-  <a href="#chat-open">상담 시작 버튼</a>
-  <a href="#system-message">시스템 메시지</a>
+  <a href="#chat-open" data-i="pointer">상담 시작 버튼</a>
+  <a href="#system-message" data-i="message">시스템 메시지</a>
   <div class="group">참고</div>
-  <a href="#codes">결과 코드</a>
-  <a href="#limits">제한 사항</a>
-  <a href="#glossary">용어집</a>
-  <a href="#changelog">변경 이력</a>
+  <a href="#codes" data-i="code">결과 코드</a>
+  <a href="#limits" data-i="ruler">제한 사항</a>
+  <a href="#glossary" data-i="glossary">용어집</a>
+  <a href="#changelog" data-i="commit">변경 이력</a>
+  <div class="side-foot">
+    <div class="side-card">
+      <span class="eyebrow">API v3</span>
+      <b>테스트 채널 1개월 무료</b>
+      <p>가입하면 발신프로필 키와 API 토큰이 바로 발급됩니다.</p>
+      <a class="btn sm" href="login.html">무료로 시작</a>
+    </div>
+  </div>
 </aside>
 <main class="main"><div class="page doc">
 
 <section id="overview">
-<h1>TalkConnector API</h1>
-<p>TalkConnector는 카카오 상담톡 API 중계 서버입니다. 고객사가 보낸 요청을 받아 카카오에 그대로 전달하고, 카카오에서 들어온 고객 메시지를 고객사 서버로 전달합니다. 카카오 허브파트너 계약, 발신프로필 등록, 수신 도메인 등록은 TalkConnector가 대신 처리합니다.</p>
+<span class="eyebrow">API Reference · v3</span><h1 style="margin-top:10px">톡커넥터 API로<br><em>상담톡을 연결</em>합니다</h1>
+<p>톡커넥터는 카카오 상담톡 API 중계 서버입니다. 고객사가 보낸 요청을 받아 카카오에 그대로 전달하고, 카카오에서 들어온 고객 메시지를 고객사 서버로 전달합니다. 카카오 허브파트너 계약, 발신프로필 등록, 수신 도메인 등록은 톡커넥터가 대신 처리합니다.</p>
 <div class="flow">
   <div class="flow-node"><b>고객사 서버</b><span>상담 시스템</span></div>
   <div class="flow-arrow"><span>/v3/chat/send/...</span><span class="back">/message, /reference ...</span></div>
-  <div class="flow-node accent"><b>TalkConnector</b><span>중계 서버</span></div>
+  <div class="flow-node accent"><b>톡커넥터</b><span>중계 서버</span></div>
   <div class="flow-arrow"><span>카카오 상담톡 API</span><span class="back">수신 콜백</span></div>
   <div class="flow-node"><b>카카오톡</b><span>고객</span></div>
 </div>
@@ -331,7 +340,7 @@
 
 <section id="signature">
 <h2>서명 검증</h2>
-<p>수신 요청이 TalkConnector에서 왔는지 <code>X-Signature</code> 헤더로 확인합니다. 값은 HS256 JWT이며, Channel Secret으로 서명되어 있고 클레임 <code>jwtToken</code>에 고객사 API 토큰이 들어 있습니다.</p>
+<p>수신 요청이 톡커넥터에서 왔는지 <code>X-Signature</code> 헤더로 확인합니다. 값은 HS256 JWT이며, Channel Secret으로 서명되어 있고 클레임 <code>jwtToken</code>에 고객사 API 토큰이 들어 있습니다.</p>
 <ol>
 <li>Channel Secret으로 JWT 서명(HS256)을 검증합니다.</li>
 <li>클레임 <code>jwtToken</code>이 고객사 API 토큰과 같은지 확인합니다.</li>
@@ -455,7 +464,7 @@ def verify(signature: str) -> bool:
 <p><code>chat_bubble_type: "KAKAO_CERT"</code>와 <code>cert_expiry</code>(분)를 보냅니다. 별도 계약과 채널 등록이 필요하므로 도입 문의로 신청하세요. 과금은 상담방과 별개로 인증 완료 건당입니다. 결과는 <code>/cert_result</code>로 암호화되어 전달되며, 복호화 키는 계약 시 안내합니다.</p>
 <div class="endpoint"><span class="method get">GET</span>/v3/chat/cert/status?cert_tx_id={cert_tx_id}</div>
 <p>인증 진행 상태 <code>sign_status</code>를 조회합니다: <code>NOT_COMPLETED</code> 진행 중, <code>COMPLETED</code> 완료, <code>EXPIRED</code> 만료.</p>
-<div class="notice warn small">개인정보와 인증 정보는 TalkConnector에 저장되지 않습니다. 고객사도 상담 종료 후 지체 없이 파기하고, 인증 정보는 고객 식별 즉시 파기해야 합니다.</div>
+<div class="notice warn small">개인정보와 인증 정보는 톡커넥터에 저장되지 않습니다. 고객사도 상담 종료 후 지체 없이 파기하고, 인증 정보는 고객 식별 즉시 파기해야 합니다.</div>
 </section>
 
 <section id="chat-open">
@@ -535,7 +544,7 @@ def verify(signature: str) -> bool:
 <tr><td>user_key</td><td>카카오가 채널별로 발급하는 고객 식별자. 채널이 다르면 같은 사람도 다른 값, 카카오톡 탈퇴 후 재가입하면 바뀜</td></tr>
 <tr><td>발신프로필 키</td><td>카카오에 등록된 채널의 식별자 <code>sender_key</code></td></tr>
 <tr><td>수신 도메인</td><td>고객사가 <code>/message</code> 등을 구현한 서버 주소. 콘솔에 등록</td></tr>
-<tr><td>상담방</td><td>TalkConnector 과금 단위. 상담원이 메시지를 보낸 세션 1개</td></tr>
+<tr><td>상담방</td><td>톡커넥터 과금 단위. 상담원이 메시지를 보낸 세션 1개</td></tr>
 <tr><td>시스템 메시지</td><td>카카오가 상황에 따라 자동으로 보내는 안내. 과금 제외</td></tr>
 <tr><td>extra</td><td>상담 시작 버튼이나 메시지 버튼에 넣는 메타 정보. 개인정보 금지</td></tr>
 </table></div>
@@ -564,6 +573,26 @@ const spy = () => {
 document.addEventListener('scroll', spy, { passive: true });
 links.forEach(a => a.addEventListener('click', () => document.getElementById('sidebar').classList.remove('open')));
 spy();
+TC.copyButtons(document.querySelector('.doc'));
+
+// Sidebar search: filter menu items by label or section text
+const search = document.getElementById('docSearch');
+const groups = TC.$$('#sidebar .group');
+search.addEventListener('input', () => {
+  const q = search.value.trim().toLowerCase();
+  links.forEach(a => {
+    const sec = document.getElementById(a.getAttribute('href').slice(1));
+    const hit = !q || a.textContent.toLowerCase().includes(q) || (sec && sec.textContent.toLowerCase().includes(q));
+    a.classList.toggle('hidden', !hit);
+  });
+  groups.forEach(g => {
+    let n = g.nextElementSibling, any = false;
+    while (n && n.tagName === 'A') { if (!n.classList.contains('hidden')) any = true; n = n.nextElementSibling; }
+    g.classList.toggle('hidden', !any);
+  });
+});
+search.addEventListener('keydown', e => { if (e.key === 'Enter') { const a = links.find(x => !x.classList.contains('hidden')); if (a) { location.hash = a.getAttribute('href'); search.blur(); } } });
+document.addEventListener('keydown', e => { if (e.key === '/' && document.activeElement !== search && !/input|textarea/i.test(document.activeElement.tagName)) { e.preventDefault(); search.focus(); } });
 </script>
 </body>
 </html>

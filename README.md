@@ -17,6 +17,13 @@
 | `admin.html` | 운영자 콘솔: 고객, 채널, 과금 집계 대조, 무료 이력, 테스트 연장, Enterprise 예외 | 4차 |
 | `terms.html` `privacy.html` | 이용약관, 개인정보 처리방침 초안 | 1차 |
 
+## 디자인
+
+- 로고: `assets/brand/` (A_fast-bubble안). 헤더·푸터는 `logo-light.svg`, 다크 모드는 `logo-dark.svg`, 파비콘 `favicon.svg`
+- 톤앤매너: 개편 홈페이지 시안의 숲녹색 계열(`#0a3d2e`, `#12865a`, 라임 `#cff27a`), 캡슐형 상단 메뉴, 화살표 원형 CTA
+- 공통 스타일 `assets/css/style.css`, 소개 페이지 전용 `assets/css/landing.css`
+- 콘솔·문서·운영자는 `body.app` 레이아웃: 아이콘 좌측 메뉴(`data-i`로 아이콘 지정), 하단 상태 카드
+
 ## 데모 순서
 
 1. `login.html`에서 가입 (이름·이메일 직접 입력)

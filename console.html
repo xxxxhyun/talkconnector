@@ -3,29 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TalkConnector 콘솔</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%232f5bea%22/%3E%3Cpath d=%22M6 16h7M19 16h7%22 stroke=%22white%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%223.5%22 fill=%22none%22 stroke=%22white%22 stroke-width=%223%22/%3E%3C/svg%3E">
+<title>톡커넥터 콘솔</title>
+<link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
+<body class="app">
 <div id="header" data-links="false"></div>
 <div class="shell">
   <aside class="sidebar" id="sidebar">
-    <div class="group">시작</div>
-    <a href="#/">대시보드</a>
+    <div class="group">Overview</div>
+    <a href="#/" data-i="home">대시보드</a>
     <div class="group">연동</div>
-    <a href="#/channels">채널</a>
-    <a href="#/keys">API 토큰</a>
-    <a href="#/webhook">수신 설정</a>
+    <a href="#/channels" data-i="chat">채널</a>
+    <a href="#/keys" data-i="key">API 토큰</a>
+    <a href="#/webhook" data-i="inbox">수신 설정</a>
     <div class="group">과금</div>
-    <a href="#/usage">사용량</a>
-    <a href="#/billing">요금제·결제</a>
+    <a href="#/usage" data-i="chart">사용량</a>
+    <a href="#/billing" data-i="card">요금제·결제</a>
     <div class="group">계정</div>
-    <a href="#/settings">설정</a>
-    <a href="#/audit">접근 이력</a>
-    <div class="group">도움말</div>
-    <a href="docs.html">API 문서</a>
+    <a href="#/settings" data-i="settings">설정</a>
+    <a href="#/audit" data-i="history">접근 이력</a>
+    <a href="docs.html" data-i="book">API 문서 <span class="tag">v3</span></a>
+    <div class="side-foot" id="sideFoot"></div>
   </aside>
   <main class="main"><div class="page" id="page"></div></main>
 </div>

@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TalkConnector</title>
-<meta name="description" content="카카오 상담톡 API를 가입 당일 바로 연동하는 셀프서비스">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%232f5bea%22/%3E%3Cpath d=%22M6 16h7M19 16h7%22 stroke=%22white%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%223.5%22 fill=%22none%22 stroke=%22white%22 stroke-width=%223%22/%3E%3C/svg%3E">
+<title>톡커넥터 | 카카오 상담톡 API 셀프서비스</title>
+<meta name="description" content="카카오 상담톡 API를 가입 당일 연결하는 셀프서비스. 계약서 없이 가입하고, 채널을 인증하면 발신프로필 키와 API 토큰이 바로 발급됩니다.">
+<link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/landing.css">
@@ -15,166 +15,133 @@
 
 <main class="lp">
 
-<section class="hero2">
-  <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
-  <div class="gridbg" aria-hidden="true"></div>
+<!-- Hero -->
+<section class="ph">
+  <div class="rings" aria-hidden="true"><i></i><i></i></div>
   <div class="wrap cols">
     <div>
-      <div class="pill reveal"><span class="dot"></span>카카오 상담톡 API 셀프서비스</div>
-      <h1 class="reveal" style="--d:.06s">상담톡 연동,<br><span class="grad-text">계약서 없이 오늘</span><br>시작하세요</h1>
-      <p class="lead2 reveal" style="--d:.12s">구글이나 카카오 계정으로 가입하고 채널을 인증하면 발신프로필 키와 API 토큰이 바로 발급됩니다. 고객사는 메시지를 보내고 받기만 하면 됩니다.</p>
-      <div class="cta-row reveal" style="--d:.18s">
-        <a class="btn lg primary glow" href="login.html">무료로 시작하기 <svg class="arr" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        <a class="btn lg ghost" href="docs.html">API 문서 보기</a>
-      </div>
-      <div class="chips reveal" style="--d:.24s">
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>테스트 채널 1개월 무료</span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>카드 등록 없이 시작</span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>약정 없음</span>
+      <span class="chip">Product · 상담톡 API 셀프서비스</span>
+      <h1><span class="w">카카오 상담톡 API를</span><br><span class="w"><em>가입 당일</em></span> <span class="w">연결합니다.</span></h1>
+      <p class="lead2">계약서와 신청 메일 없이 가입하고, 채널을 인증하면 발신프로필 키와 API 토큰이 바로 발급됩니다. 고객사는 메시지를 보내고 받는 API만 구현합니다.</p>
+      <div class="cta">
+        <a class="btn lg lime arrow" href="login.html">무료로 시작하기<span class="ac"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+        <a class="btn lg arrow" href="docs.html">API 문서 보기<span class="ac"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
       </div>
     </div>
+    <div class="stats">
+      <div class="reveal"><div class="n" data-to="3">0분</div><div class="l">첫 메시지까지</div><div class="s">가입 · 채널 인증 · 테스트 수신</div></div>
+      <div class="reveal" style="--d:.1s"><div class="n" data-to="30">0일</div><div class="l">무료 테스트</div><div class="s">테스트 채널 1개 · 카드 등록 없음</div></div>
+      <div class="reveal" style="--d:.2s"><div class="n" data-to="8">0종</div><div class="l">말풍선 유형</div><div class="s">텍스트 · 이미지 · 캐러셀 · 본인 인증</div></div>
+    </div>
+  </div>
+</section>
 
-    <div class="stage reveal" style="--d:.15s" aria-label="상담 흐름 미리보기">
-      <div class="floatcard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><div><b>채널 연결 완료</b><span class="muted">발신프로필 키 발급</span></div></div>
-      <div class="phone">
-        <div class="screen">
-          <div class="bar"><span class="av"></span>마이브랜드 고객센터</div>
-          <div class="msgs" id="msgs"><div class="typing" id="typing"><i></i><i></i><i></i></div></div>
+<!-- Comparison strip -->
+<section class="wrap" style="padding-top:24px">
+  <div class="sec-head reveal">
+    <span class="eyebrow">Before / After</span>
+    <h2 class="t" style="margin-top:0">상담톡 도입을 <em>메일과 서류로</em><br>진행하지 않습니다.</h2>
+  </div>
+  <div class="vs2 reveal">
+    <div class="rowx old"><div>기존 도입 방식</div><div>담당자 메일로 신청</div><div>계약서·서류 교환</div><div>IP·도메인 수작업 등록</div><div>PDF 가이드 전달</div><div>세금계산서·입금 확인</div><div>평균 2주</div></div>
+    <div class="rowx new"><div>톡커넥터</div><div>구글·카카오 로그인</div><div>약관 동의로 대체</div><div>콘솔에서 직접 등록</div><div>웹 API 문서·예제</div><div>카드 자동결제</div><div>당일 개통</div></div>
+  </div>
+</section>
+
+<!-- Feature explorer -->
+<section class="sec" id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">연결 기능</span>
+      <div>
+        <h2 class="t" style="margin-top:0">상담에 필요한 연결을<br><em>화면으로 확인</em>합니다.</h2>
+        <p class="lead2">허브파트너 계약, 발신프로필 등록, 수신 도메인 설정은 톡커넥터가 맡습니다. 고객사가 다루는 것은 아래 여섯 가지입니다.</p>
+      </div>
+    </div>
+    <div class="fx">
+      <div class="fx-list" id="fxList"></div>
+      <div class="reveal">
+        <div class="screen-frame">
+          <div class="chrome"><i></i><i></i><i></i><span id="fxPath">api.talkconnector.example</span><b id="fxBadge">상담 필수</b></div>
+          <div id="fxPanels"></div>
         </div>
-      </div>
-      <div class="log" aria-hidden="true">
-        <div class="t"><i></i><i></i><i></i></div>
-        <div id="log"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="wrap">
-    <div class="stats reveal">
-      <div><div class="n" data-to="3">0<small>분</small></div><div class="l">첫 메시지까지</div></div>
-      <div><div class="n" data-to="30">0<small>일</small></div><div class="l">무료 테스트</div></div>
-      <div><div class="n" data-to="0">0<small>원</small></div><div class="l">가입비·약정</div></div>
-      <div><div class="n" data-to="8">0<small>종</small></div><div class="l">말풍선 유형</div></div>
-    </div>
-  </div>
-</section>
-
-<div class="marquee" aria-hidden="true"><div class="track" id="marquee"></div></div>
-
-<section class="sec" id="how">
-  <div class="wrap">
-    <div class="center reveal">
-      <span class="kicker">HOW IT WORKS</span>
-      <h2 class="title">3단계면 연동이 끝납니다</h2>
-      <p class="lead2">가입부터 첫 테스트 메시지 수신까지, 담당자 응대 없이 혼자서 진행합니다</p>
-    </div>
-    <div class="timeline" id="timeline">
-      <div class="rail"><i id="rail"></i></div>
-      <div class="tl-step reveal">
-        <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
-        <div class="num">STEP 1</div>
-        <h3>셀프 가입</h3>
-        <p>구글·카카오 로그인과 약관 동의로 계약을 대신합니다. 서류와 등기 교환이 없습니다.</p>
-      </div>
-      <div class="tl-step reveal" style="--d:.1s">
-        <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></div>
-        <div class="num">STEP 2</div>
-        <h3>채널 연결</h3>
-        <p>채널 검색용 아이디와 관리자 휴대폰 인증으로 연결합니다. 발신프로필 키, API 토큰, Channel Secret이 자동 발급됩니다.</p>
-      </div>
-      <div class="tl-step reveal" style="--d:.2s">
-        <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h12M12 6l6 6-6 6"/><path d="M20 4v16"/></svg></div>
-        <div class="num">STEP 3</div>
-        <h3>수신 도메인 등록</h3>
-        <p>고객사 서버 주소를 등록하고 테스트 요청으로 수신을 확인합니다. 운영 전환 시 요금제를 고르고 카드를 등록합니다.</p>
+        <p class="screen-cap">화면은 설명용 예시입니다. 실제 키와 고객 정보는 표시하지 않습니다.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="sec alt">
+<!-- Steps -->
+<section class="sec" id="how" style="padding-top:0">
   <div class="wrap">
-    <div class="center reveal">
-      <span class="kicker">BEFORE / AFTER</span>
-      <h2 class="title">2주 걸리던 도입을 당일로</h2>
-      <p class="lead2">메일, 서류, 수작업 등록으로 이어지던 도입 절차를 셀프서비스로 바꿨습니다</p>
+    <div class="sec-head reveal">
+      <span class="eyebrow">도입 준비</span>
+      <div>
+        <h2 class="t" style="margin-top:0">상담톡을 열기 전에<br><em>3단계</em>만 준비합니다.</h2>
+        <p class="lead2">채널을 연결하고, 수신 서버를 등록하고, 운영으로 전환합니다. 담당자 응대 없이 콘솔에서 혼자 진행합니다.</p>
+      </div>
     </div>
-    <div class="vs">
-      <div class="side old reveal">
-        <div class="lab">기존 도입 방식</div>
-        <div class="big">평균 2주</div>
+    <div class="steps3">
+      <div class="st reveal">
+        <div class="top"><h3>가입·채널 연결</h3><span class="num">01·02</span></div>
         <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>담당자 메일로 사용 신청</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>견적 협의, 계약서·서류 교환</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>서버 IP·수신 도메인 수작업 등록</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>PDF 가이드와 메일로 받는 연동 정보</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>매월 세금계산서·입금 확인</li>
+          <li><span class="k">01</span><div><b>셀프 가입</b>구글·카카오 로그인, 약관 동의로 계약을 대신합니다.</div></li>
+          <li><span class="k">02</span><div><b>채널 인증</b>검색용 아이디와 관리자 휴대폰 인증. 발신프로필 키·API 토큰·Channel Secret 자동 발급.</div></li>
         </ul>
+        <div class="art"><img src="assets/brand/symbol.svg" alt=""></div>
       </div>
-      <div class="mid"><span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-      <div class="side new reveal" style="--d:.12s">
-        <div class="lab">TalkConnector</div>
-        <div class="big">당일 개통</div>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>구글·카카오 로그인, 약관 동의</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>채널 인증 즉시 키·토큰 발급</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>수신 도메인 직접 등록, 테스트 요청으로 확인</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>웹 API 문서와 예제 코드</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>카드 자동결제, 사용량 알림</li>
-        </ul>
+      <div class="st reveal" style="--d:.08s">
+        <div class="top"><h3>수신 등록</h3><span class="num">03</span></div>
+        <ul><li><span class="k">03</span><div><b>수신 도메인</b>고객사 서버 주소를 등록하고 테스트 요청으로 /message 수신을 확인합니다.</div></li></ul>
+        <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-8h12l2 8"/><path d="M4 13v6h16v-6h-5a3 3 0 0 1-6 0z"/></svg></div>
+      </div>
+      <div class="st reveal" style="--d:.16s">
+        <div class="top"><h3>운영 전환</h3><span class="num">04</span></div>
+        <ul><li><span class="k">04</span><div><b>요금제·카드</b>요금제를 고르고 카드를 등록하면 운영 채널과 운영 토큰이 열립니다.</div></li></ul>
+        <div class="art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 7v5M9 4.8A8 8 0 0 0 12 20"/></svg></div>
       </div>
     </div>
+    <a class="bar-cta reveal" href="docs.html#prepare">
+      <div><b>연동 정보가 처음이라면 문서부터 확인하세요.</b><span>발신프로필 키, API 토큰, 수신 도메인이 어디에 쓰이는지 한 페이지로 정리했습니다.</span></div>
+      <span class="ac"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
   </div>
 </section>
 
-<section class="sec">
+<!-- Developers -->
+<section class="sec blk">
   <div class="wrap">
-    <div class="center reveal">
-      <span class="kicker">FOR DEVELOPERS</span>
-      <h2 class="title">보내고, 받고, 검증하면 끝</h2>
-      <p class="lead2">허브파트너 계약과 발신프로필 등록은 TalkConnector가 맡습니다. 고객사는 상담에 필요한 API만 구현합니다</p>
+    <div class="sec-head reveal">
+      <span class="eyebrow">For developers</span>
+      <div>
+        <h2 class="t" style="margin-top:0">필수 API는<br><em>보내기와 받기</em>뿐입니다.</h2>
+        <p class="lead2">카카오 상담톡 API와 같은 필드 이름을 씁니다. 기존 연동 코드가 있다면 주소와 헤더만 바꾸면 됩니다.</p>
+      </div>
     </div>
-    <div class="bento">
-      <div class="tile w4 reveal">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/></svg></span>
-        <h3>필수 API는 단 몇 개</h3>
-        <p>메시지 보내기와 상담 종료, 그리고 수신 경로 3개. 이것만으로 상담이 됩니다.</p>
-        <div class="tabs" role="tablist" id="tabs">
-          <button class="on" data-t="send">보내기</button><button data-t="recv">받기</button><button data-t="sig">서명 검증</button>
-        </div>
+    <div class="dev">
+      <div class="code-card reveal">
+        <div class="tabs2" id="tabs"><button class="on" data-t="send">보내기</button><button data-t="recv">받기</button><button data-t="sig">서명 검증</button></div>
         <pre id="code"></pre>
       </div>
-      <div class="tile w2 reveal" style="--d:.08s">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 10h10M7 14h6"/></svg></span>
-        <h3>8종 말풍선</h3>
-        <p>텍스트부터 캐러셀, 개인정보 동의, 본인 인증까지 카카오 상담톡 말풍선을 그대로 씁니다.</p>
-        <div class="mini-bubbles"><span>TEXT</span><span>IMAGE</span><span>WIDE</span><span>ITEM_LIST</span><span>WIDE_ITEM_LIST</span><span>CAROUSEL_FEED</span><span>PERSONAL</span><span>KAKAO_CERT</span></div>
-      </div>
-      <div class="tile w2 reveal">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9V3"/></svg></span>
-        <h3>테스트 환경 제공</h3>
-        <p>과금되지 않는 테스트 채널과 테스트 토큰으로 개발하고, 운영 전환 시 키와 토큰만 바꿉니다.</p>
-      </div>
-      <div class="tile w2 reveal" style="--d:.08s">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
-        <h3>운영에 필요한 보안</h3>
-        <p>고객사별 Channel Secret 서명, 토큰 마스킹과 즉시 폐기, 관리자 접근 이력을 기본 제공합니다.</p>
-      </div>
-      <div class="tile w2 reveal" style="--d:.16s">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
-        <h3>채널 설정은 콘솔에서</h3>
-        <p>상담 시작 버튼 링크, 시스템 메시지 문구 검수, 사용량 확인을 코딩 없이 처리합니다.</p>
+      <div class="pts reveal" style="--d:.1s">
+        <div><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9V3"/></svg></span><div><b>과금 없는 테스트 환경</b><p>테스트 채널과 테스트 토큰으로 개발하고, 운영 전환 시 키와 토큰만 바꿉니다.</p></div></div>
+        <div><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><div><b>고객사별 서명</b><p>수신 요청마다 고객사 Channel Secret으로 서명한 X-Signature를 붙입니다.</p></div></div>
+        <div><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 10h10M7 14h6"/></svg></span><div><b>8종 말풍선 그대로</b><p>텍스트부터 캐러셀, 개인정보 동의, 카카오톡 본인 인증까지 지원합니다.</p></div></div>
+        <div><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></span><div><b>접근 이력과 토큰 관리</b><p>토큰 마스킹, 재발급 시 즉시 폐기, 관리자 접근 이력을 기본 제공합니다.</p></div></div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="sec alt" id="pricing">
+<!-- Pricing -->
+<section class="sec" id="pricing">
   <div class="wrap">
-    <div class="center reveal">
-      <span class="kicker">PRICING</span>
-      <h2 class="title">상담한 만큼만 내는 요금제</h2>
-      <p class="lead2">가입비와 기본료가 없습니다. 상담방 1건은 상담원이 메시지를 보낸 상담 세션 1개입니다. 부가세 별도</p>
+    <div class="sec-head reveal">
+      <span class="eyebrow">Pricing</span>
+      <div>
+        <h2 class="t" style="margin-top:0">상담한 만큼만 내는<br><em>선불 요금제</em>입니다.</h2>
+        <p class="lead2">가입비와 기본료가 없습니다. 상담방 1건은 상담원이 메시지를 보낸 상담 세션 1개입니다. 부가세 별도</p>
+      </div>
     </div>
     <div class="price-grid" id="plans"></div>
     <div class="price-extra reveal">
@@ -184,31 +151,37 @@
   </div>
 </section>
 
-<section class="sec" id="faq">
-  <div class="wrap">
-    <div class="center reveal">
-      <span class="kicker">FAQ</span>
-      <h2 class="title">자주 묻는 질문</h2>
+<!-- FAQ -->
+<section class="sec" id="faq" style="padding-top:0">
+  <div class="wrap faq2">
+    <div class="reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2 class="t">자주 묻는 질문</h2>
+      <p class="lead2">더 궁금한 점은 <a href="docs.html">API 문서</a>나 <a href="mailto:sales@talkconnector.example">도입 문의</a>로 알려 주세요.</p>
     </div>
-    <div class="faq">
-      <details class="reveal" open><summary>카카오와 직접 계약해야 하나요?</summary><p>아닙니다. TalkConnector가 카카오 공식 딜러로서 허브파트너 역할을 맡습니다. 고객사는 약관 동의만으로 이용합니다.</p></details>
-      <details class="reveal"><summary>기존 상담 시스템에 붙일 수 있나요?</summary><p>네. 상담 시스템이 메시지 보내기 API를 호출하고, 수신 도메인의 /message 경로로 고객 메시지를 받으면 됩니다. 카카오 상담톡 API와 같은 필드 이름을 쓰므로 기존 연동 코드를 거의 그대로 쓸 수 있습니다.</p></details>
-      <details class="reveal"><summary>요금은 어떻게 집계되나요?</summary><p>카카오 통계 기준 상담방(세션) 수로 매일 04시에 집계합니다. 상담원이 메시지를 보낸 세션만 과금되며 시스템 메시지는 제외됩니다.</p></details>
-      <details class="reveal"><summary>사용량을 다 쓰면 어떻게 되나요?</summary><p>80% 도달과 소진 시점에 메일로 알립니다. 소진되면 상위 요금제로 변경하기 전까지 발송이 중단됩니다. Enterprise는 중단 없이 후불 정산합니다.</p></details>
-      <details class="reveal"><summary>재판매할 수 있나요?</summary><p>가능합니다. 다만 약관에 따라 공급가 이하로 판매할 수 없습니다. 재판매 파트너는 도입 문의로 연락 주세요.</p></details>
-      <details class="reveal"><summary>채널을 연결하면 1:1 채팅은 어떻게 되나요?</summary><p>상담톡을 활성화하면 카카오비즈니스 파트너센터의 1:1 채팅 메뉴는 사용할 수 없고, 모든 상담은 API로 처리됩니다.</p></details>
-      <details class="reveal"><summary>상담 내역은 어디에 저장되나요?</summary><p>카카오는 상담 메시지를 3일만 보관합니다. 수신 도메인으로 받은 메시지는 고객사 시스템에 저장해 주세요.</p></details>
+    <div class="reveal" style="--d:.08s">
+      <details open><summary><span class="q">Q1</span>카카오와 직접 계약해야 하나요?</summary><p>아닙니다. 톡커넥터가 카카오 공식 딜러로서 허브파트너 역할을 맡습니다. 고객사는 약관 동의만으로 이용합니다.</p></details>
+      <details><summary><span class="q">Q2</span>기존 상담 시스템에 붙일 수 있나요?</summary><p>네. 상담 시스템이 메시지 보내기 API를 호출하고, 수신 도메인의 /message 경로로 고객 메시지를 받으면 됩니다. 카카오 상담톡 API와 같은 필드 이름을 쓰므로 기존 연동 코드를 거의 그대로 쓸 수 있습니다.</p></details>
+      <details><summary><span class="q">Q3</span>요금은 어떻게 집계되나요?</summary><p>카카오 통계 기준 상담방(세션) 수로 매일 04시에 집계합니다. 상담원이 메시지를 보낸 세션만 과금되며 시스템 메시지는 제외됩니다.</p></details>
+      <details><summary><span class="q">Q4</span>사용량을 다 쓰면 어떻게 되나요?</summary><p>80% 도달과 소진 시점에 메일로 알립니다. 소진되면 상위 요금제로 변경하기 전까지 발송이 중단됩니다. Enterprise는 중단 없이 후불 정산합니다.</p></details>
+      <details><summary><span class="q">Q5</span>재판매할 수 있나요?</summary><p>가능합니다. 다만 약관에 따라 공급가 이하로 판매할 수 없습니다. 재판매 파트너는 도입 문의로 연락 주세요.</p></details>
+      <details><summary><span class="q">Q6</span>채널을 연결하면 1:1 채팅은 어떻게 되나요?</summary><p>상담톡을 활성화하면 카카오비즈니스 파트너센터의 1:1 채팅 메뉴는 사용할 수 없고, 모든 상담은 API로 처리됩니다.</p></details>
+      <details><summary><span class="q">Q7</span>상담 내역은 어디에 저장되나요?</summary><p>카카오는 상담 메시지를 3일만 보관합니다. 수신 도메인으로 받은 메시지는 고객사 시스템에 저장해 주세요.</p></details>
     </div>
   </div>
 </section>
 
+<!-- Final CTA -->
 <div class="wrap">
-  <div class="final reveal">
-    <h2>지금 가입하면 오늘 첫 상담을 받습니다</h2>
-    <p>테스트 채널 1개월 무료. 카드 등록 없이 시작하세요.</p>
-    <div class="cta-row" style="justify-content:center">
-      <a class="btn lg primary" href="login.html">무료로 시작하기 <svg class="arr" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      <a class="btn lg ghost" href="docs.html">API 문서 보기</a>
+  <div class="final2 reveal">
+    <div>
+      <span class="eyebrow">Get started</span>
+      <h2>검토 중인 상담톡 연동,<br>오늘 시작할 수 있습니다.</h2>
+      <p>테스트 채널 1개월 무료. 카드 등록 없이 시작하세요.</p>
+    </div>
+    <div class="btns">
+      <a class="btn lg lime arrow" href="login.html">무료로 시작하기<span class="ac"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+      <a class="btn lg ghost" href="mailto:sales@talkconnector.example">도입 문의</a>
     </div>
   </div>
 </div>
@@ -220,8 +193,7 @@
 <script>
 TC.mountChrome();
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
-document.querySelector('.screen .av').innerHTML = TC.BRAND_SVG;
+const CHECK = TC.icon('check');
 
 // Pricing
 document.getElementById('plans').innerHTML = TC.PLANS.map((p, i) => `
@@ -235,14 +207,10 @@ document.getElementById('plans').innerHTML = TC.PLANS.map((p, i) => `
       <li>${CHECK}API 전체 이용</li>
       <li>${CHECK}사용량 80%·소진 알림</li>
     </ul>
-    <a class="btn ${p.featured ? 'primary glow' : ''} block" href="login.html">시작하기</a>
+    <a class="btn ${p.featured ? 'lime' : ''} block" href="login.html">시작하기</a>
   </div>`).join('');
 
-// Marquee
-const words = ['텍스트', '이미지', '동영상', '파일', '버튼', '바로연결', '쿠폰', '아이템 리스트', '캐러셀', '개인정보 동의', '카카오톡 본인 인증', '상담 시작 버튼', '시스템 메시지', '세션 연장', '고객 차단'];
-document.getElementById('marquee').innerHTML = [...words, ...words].map(w => `<span>${w}</span>`).join('');
-
-// Code tabs
+// Developer code tabs
 const CODE = {
   send: `<span class="tok-c"># 고객에게 메시지 보내기</span>
 curl -X POST https://api.talkconnector.example<span class="tok-k">/v3/chat/send/plain</span> \\
@@ -275,90 +243,122 @@ const setTab = t => { codeEl.innerHTML = CODE[t]; TC.$$('#tabs button').forEach(
 TC.$$('#tabs button').forEach(b => b.onclick = () => setTab(b.dataset.t));
 setTab('send');
 
-// Spotlight hover on tiles
-TC.$$('.tile').forEach(el => el.addEventListener('pointermove', e => {
-  const r = el.getBoundingClientRect();
-  el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-  el.style.setProperty('--my', (e.clientY - r.top) + 'px');
-}));
+// Feature explorer: numbered list on the left, matching screen on the right
+const SYM = '<img src="assets/brand/symbol.svg" alt="">';
+const FEATURES = [
+  { t: '상담 메시지 주고받기', d: '고객이 카카오톡 채널로 보낸 메시지를 수신 도메인으로 받고, 메시지 보내기 API로 답합니다.', path: 'POST /v3/chat/send/plain', badge: '상담 필수',
+    html: `<div class="p-chat"><div class="kt"><div class="bar">${SYM}마이브랜드 고객센터</div><div class="msgs" id="msgs"><div class="typing" id="typing"><i></i><i></i><i></i></div></div></div>
+      <div class="ag"><div class="hd">중계 로그<span>실시간</span></div><div class="log" id="log"></div></div></div>` },
+  { t: '리치 메시지', d: '버튼, 바로연결, 쿠폰, 캐러셀, 아이템 리스트를 카카오 말풍선 그대로 보냅니다.', path: 'POST /v3/chat/send/rich', badge: '상담 필수',
+    html: `<div class="p-rich"><div><div class="rich-card"><div class="img">주문 1234 배송 중</div><div class="tx">오늘 18~20시 도착 예정입니다.<small>실시간 위치를 확인해 보세요.</small></div><div class="bt"><span>배송 조회</span><span class="y">상담원 연결</span></div></div><div class="qr"><span>교환</span><span>반품</span><span>주문 취소</span></div></div></div>` },
+  { t: '수신 도메인으로 받기', d: '고객 메시지, 상담 시작, 상담 종료를 고객사 서버의 정해진 경로로 그대로 전달합니다.', path: 'https://cs.your-company.com/kakao', badge: '상담 필수',
+    html: `<div class="p-list"><div class="ttl">수신 경로<span>테스트 수신 확인</span></div>
+      <div class="li"><code>/message</code><span>고객 메시지</span><span class="tg g">200 OK</span></div>
+      <div class="li"><code>/reference</code><span>상담 시작, extra 전달</span><span class="tg g">200 OK</span></div>
+      <div class="li"><code>/expired_session</code><span>상담 세션 종료</span><span class="tg g">200 OK</span></div>
+      <div class="li"><code>/personal_info</code><span>개인정보 동의 결과</span><span class="tg">선택</span></div>
+      <div class="li"><code>/cert_result</code><span>카카오톡 본인 인증 결과</span><span class="tg">선택</span></div></div>` },
+  { t: '서명 검증', d: '모든 수신 요청에 고객사 Channel Secret으로 서명한 X-Signature가 붙습니다. JWT 라이브러리로 몇 줄이면 검증합니다.', path: 'X-Signature: eyJ0eXAi...', badge: '보안',
+    html: `<div class="p-code"><pre><span class="tok-c"># Python (PyJWT)</span>
+<span class="tok-k">import</span> jwt
+
+<span class="tok-k">def</span> verify(signature: str) -> bool:
+    <span class="tok-k">try</span>:
+        claims = jwt.decode(signature, CHANNEL_SECRET,
+                            algorithms=[<span class="tok-s">"HS256"</span>])
+    <span class="tok-k">except</span> jwt.InvalidTokenError:
+        <span class="tok-k">return</span> False
+    <span class="tok-k">return</span> claims.get(<span class="tok-s">"jwtToken"</span>) == API_TOKEN</pre></div>` },
+  { t: '키와 토큰 발급', d: '채널을 인증하면 발신프로필 키, API 토큰, Channel Secret이 콘솔에 바로 발급됩니다. 재발급하면 기존 값은 즉시 폐기됩니다.', path: 'console / API 토큰', badge: '콘솔',
+    html: `<div class="p-list"><div class="ttl">연동 정보<span>테스트</span></div>
+      <div class="li"><b>발신프로필 키</b><code>48e10e35••••••••cde8</code><span class="tg">채널별</span></div>
+      <div class="li"><b>API 토큰</b><code>eyJ0eXAi••••••••_b1v</code><span class="tg g">사용중</span></div>
+      <div class="li"><b>Channel Secret</b><code>9a41c2e0••••••••7f3d</code><span class="tg">계정별</span></div>
+      <div class="li"><b>수신 도메인</b><code>https://cs.your-company.com/kakao</code><span class="tg g">등록</span></div></div>` },
+  { t: '채널 설정', d: '상담 시작 버튼 링크와 시스템 메시지 문구 검수를 코딩 없이 콘솔에서 처리합니다.', path: 'console / 채널', badge: '콘솔',
+    html: `<div class="p-list"><div class="ttl">시스템 메시지<span>검수 요청 가능</span></div>
+      <div class="li"><b>ST 상담 시작</b><span>1:1채팅을 요청하셨습니다. 채팅 내용은...</span><span class="tg">기본</span></div>
+      <div class="li"><b>S2 상담 부재</b><span>지금은 상담 가능 시간이 아닙니다.</span><span class="tg">기본</span></div>
+      <div class="li"><b>ED 상담 종료</b><span>고객의 요청에 의해 채팅이 종료되었습니다.</span><span class="tg">기본</span></div>
+      <div class="ttl" style="margin-top:16px">상담 시작 버튼</div>
+      <div class="li"><b>링크</b><code>bizmessage.kakao.com/chat/open/@mybrand?extra=order_1234</code><span class="tg g">복사</span></div></div>` },
+];
+const fxList = document.getElementById('fxList'), fxPanels = document.getElementById('fxPanels');
+fxList.innerHTML = FEATURES.map((f, i) => `<div class="fx-item" data-i="${i}"><div class="hd"><span class="no">${String(i + 1).padStart(2, '0')}</span>${f.t}</div><div class="bd"><div><p>${f.d}</p><div class="prog"><i></i></div></div></div></div>`).join('');
+fxPanels.innerHTML = FEATURES.map((f, i) => `<div class="panel" data-i="${i}">${f.html}</div>`).join('');
+let cur = -1, timer = null, playing = 0;
+const DUR = 7000;
+const select = (i, auto = true) => {
+  cur = i;
+  TC.$$('.fx-item').forEach(x => x.classList.toggle('on', +x.dataset.i === i));
+  TC.$$('.panel').forEach(x => x.classList.toggle('on', +x.dataset.i === i));
+  document.getElementById('fxPath').textContent = FEATURES[i].path;
+  document.getElementById('fxBadge').textContent = FEATURES[i].badge;
+  const on = TC.$('.fx-item.on .prog i');
+  if (on) { on.style.animation = 'none'; on.offsetHeight; on.style.animation = ''; on.closest('.fx-item').style.setProperty('--dur', (i === 0 ? DUR * 1.6 : DUR) + 'ms'); }
+  if (i === 0) playChat();
+  clearTimeout(timer);
+  if (auto && !reduce) timer = setTimeout(() => select((i + 1) % FEATURES.length), i === 0 ? DUR * 1.6 : DUR);
+};
+TC.$$('.fx-item').forEach(x => x.onclick = () => select(+x.dataset.i));
+
+// Chat demo inside feature 01
+const SCRIPT = [
+  { bub: 'sys', text: '상담이 시작되었습니다', log: ['in', '수신', 'POST /reference', '200'] },
+  { bub: 'me', text: '주문한 상품 배송 언제 오나요?', log: ['in', '수신', 'POST /message', '200'] },
+  { typing: 1100, log: ['out', '발신', 'POST /v3/chat/send/rich', 'code 0'] },
+  { bub: 'them', text: '오늘 18~20시 도착 예정입니다.', btns: ['배송 조회', '상담원 연결'] },
+  { bub: 'me', text: '감사합니다', log: ['in', '수신', 'POST /message', '200'] },
+  { typing: 800, log: ['out', '발신', 'POST /v3/chat/send/plain', 'code 0'] },
+  { bub: 'them', text: '좋은 하루 보내세요.' },
+];
+const wait = ms => new Promise(r => setTimeout(r, ms));
+async function playChat() {
+  const run = ++playing;
+  const msgs = document.getElementById('msgs'), typing = document.getElementById('typing'), log = document.getElementById('log');
+  TC.$$('.bub', msgs).forEach(b => b.remove()); log.innerHTML = '';
+  const addLog = ([cls, dir, path, res]) => {
+    const ln = document.createElement('div'); ln.className = 'ln';
+    ln.innerHTML = `<span class="${cls}">${dir}</span> ${path} <span class="ok">${res}</span>`;
+    log.appendChild(ln); while (log.children.length > 8) log.firstElementChild.remove();
+    requestAnimationFrame(() => ln.classList.add('show'));
+  };
+  const addBub = s => {
+    const b = document.createElement('div'); b.className = 'bub ' + s.bub;
+    b.innerHTML = TC.esc(s.text) + (s.btns ? `<div class="btns">${s.btns.map(x => `<span>${x}</span>`).join('')}</div>` : '');
+    msgs.insertBefore(b, typing); while (msgs.querySelectorAll('.bub').length > 6) msgs.querySelector('.bub').remove();
+    requestAnimationFrame(() => b.classList.add('show'));
+  };
+  for (const s of SCRIPT) {
+    if (run !== playing || cur !== 0) return;
+    if (s.log) addLog(s.log);
+    if (s.typing) { if (!reduce) { typing.classList.add('show'); await wait(s.typing); typing.classList.remove('show'); } continue; }
+    addBub(s);
+    if (!reduce) await wait(1200);
+  }
+}
 
 // Count-up stats
 const countUp = el => {
-  const to = Number(el.dataset.to), unit = el.querySelector('small').outerHTML;
-  if (reduce || to === 0) { el.innerHTML = to + unit; return; }
-  const t0 = performance.now(), dur = 1200;
-  const tick = now => {
-    const p = Math.min(1, (now - t0) / dur), v = Math.round(to * (1 - Math.pow(1 - p, 3)));
-    el.innerHTML = v + unit;
-    if (p < 1) requestAnimationFrame(tick);
-  };
+  const to = Number(el.dataset.to), unit = el.textContent.replace(/[0-9]/g, '');
+  if (reduce) { el.textContent = to + unit; return; }
+  const t0 = performance.now();
+  const tick = now => { const p = Math.min(1, (now - t0) / 1200); el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))) + unit; if (p < 1) requestAnimationFrame(tick); };
   requestAnimationFrame(tick);
 };
 
-// Scroll reveal
+// Scroll reveal; start the feature explorer when it comes into view
+let started = false;
 const io = new IntersectionObserver(entries => entries.forEach(en => {
   if (!en.isIntersecting) return;
   en.target.classList.add('in');
   TC.$$('[data-to]', en.target).forEach(countUp);
   io.unobserve(en.target);
-}), { threshold: .15, rootMargin: '0px 0px -40px 0px' });
+}), { threshold: .12, rootMargin: '0px 0px -40px 0px' });
 TC.$$('.reveal').forEach(el => reduce ? (el.classList.add('in'), TC.$$('[data-to]', el).forEach(countUp)) : io.observe(el));
-
-// Timeline rail follows scroll
-const tl = document.getElementById('timeline'), rail = document.getElementById('rail'), steps = TC.$$('.tl-step');
-const onScroll = () => {
-  const r = tl.getBoundingClientRect(), vh = innerHeight;
-  const p = Math.max(0, Math.min(1, (vh * .75 - r.top) / (r.height + vh * .2)));
-  rail.style.width = (p * 100) + '%';
-  steps.forEach((s, i) => s.classList.toggle('on', p >= i / steps.length + .05 || reduce));
-};
-addEventListener('scroll', onScroll, { passive: true });
-onScroll();
-
-// Live demo: chat on the left, relay log on the right
-const msgs = document.getElementById('msgs'), typing = document.getElementById('typing'), log = document.getElementById('log');
-const SCRIPT = [
-  { bub: 'sys', text: '상담이 시작되었습니다', log: ['in', 'POST /reference', '200 · 9ms'] },
-  { bub: 'me', text: '주문한 상품 배송 언제 오나요?', log: ['in', 'POST /message', '200 · 11ms'] },
-  { typing: 1300, log: ['out', 'POST /v3/chat/send/rich', 'code 0'] },
-  { bub: 'them', text: '오늘 18~20시 도착 예정입니다. 실시간 위치를 확인해 보세요.', btns: ['배송 조회', '상담원 연결'] },
-  { bub: 'me', text: '감사합니다!', log: ['in', 'POST /message', '200 · 8ms'] },
-  { typing: 900, log: ['out', 'POST /v3/chat/send/plain', 'code 0'] },
-  { bub: 'them', text: '좋은 하루 보내세요.' },
-];
-const addLog = ([dir, path, res]) => {
-  const ln = document.createElement('div');
-  ln.className = 'ln';
-  ln.innerHTML = `<span class="${dir}">${dir === 'in' ? '수신' : '발신'}</span> ${path} <span class="ok">${res}</span>`;
-  log.appendChild(ln);
-  while (log.children.length > 5) log.firstElementChild.remove();
-  requestAnimationFrame(() => ln.classList.add('show'));
-};
-const addBub = s => {
-  const b = document.createElement('div');
-  b.className = 'bub ' + s.bub;
-  b.innerHTML = TC.esc(s.text) + (s.btns ? `<div class="btns">${s.btns.map(x => `<span>${x}</span>`).join('')}</div>` : '');
-  msgs.insertBefore(b, typing);
-  while (msgs.querySelectorAll('.bub').length > 5) msgs.querySelector('.bub').remove();
-  requestAnimationFrame(() => b.classList.add('show'));
-};
-const wait = ms => new Promise(r => setTimeout(r, ms));
-async function play() {
-  if (reduce) { SCRIPT.forEach(s => { if (s.bub) addBub(s); if (s.log) addLog(s.log); }); TC.$$('.bub, .ln').forEach(x => x.classList.add('show')); return; }
-  for (;;) {
-    for (const s of SCRIPT) {
-      if (s.log) addLog(s.log);
-      if (s.typing) { typing.classList.add('show'); await wait(s.typing); typing.classList.remove('show'); continue; }
-      addBub(s);
-      await wait(1100);
-    }
-    await wait(3200);
-    TC.$$('.bub', msgs).forEach(b => b.remove());
-    log.innerHTML = '';
-    await wait(400);
-  }
-}
-play();
+const fxIO = new IntersectionObserver(([en]) => { if (en.isIntersecting && !started) { started = true; select(0); } }, { threshold: .25 });
+fxIO.observe(document.getElementById('features'));
+select(0, false);
 </script>
 </body>
 </html>

@@ -4,6 +4,8 @@ TC.mountChrome();
 
 const page = document.getElementById('page');
 const S = () => TC.state();
+// Any view re-render refreshes code copy buttons and the sidebar plan card.
+new MutationObserver(() => { TC.copyButtons(page); renderSideFoot(); }).observe(page, { childList: true });
 
 if (!S() || !S().company) location.replace('login.html');
 
@@ -26,8 +28,24 @@ const SYSTEM_MESSAGES = [
   { id: 'ED', name: '상담 종료', text: '고객의 요청에 의해 채팅이 종료되었습니다. 다시 대화를 시작하려면 메시지를 입력해주세요.' },
 ];
 
-const head = (title, desc = '', actions = '') => `
-  <div class="page-head"><div><h1>${title}</h1>${desc ? `<p>${desc}</p>` : ''}</div><span class="spacer"></span>${actions}</div>`;
+const SECTION = { '': 'Overview', channels: '연동', keys: '연동', webhook: '연동', usage: '과금', billing: '과금', settings: '계정', audit: '계정' };
+const head = (title, desc = '', actions = '') => {
+  const sec = SECTION[(location.hash.replace(/^#\/?/, '').split('/')[0])] || 'Console';
+  return `<div class="page-head"><div><span class="eyebrow">${sec}</span><h1>${title}</h1>${desc ? `<p>${desc}</p>` : ''}</div><span class="spacer"></span>${actions}</div>`;
+};
+const stat = (icon, label, value, sub = '', valueStyle = '') => `<div class="card stat"><div class="label"><span class="stat-ic">${TC.icon(icon)}</span>${label}</div><div class="value" style="${valueStyle}">${value}</div>${sub}</div>`;
+
+function renderSideFoot() {
+  const el = document.getElementById('sideFoot');
+  const s = S();
+  if (!el || !s || !s.company) return;
+  const q = quotaState(s);
+  const left = trialLeft(s);
+  const card = q
+    ? `<div class="side-card"><span class="eyebrow">${q.plan.name} 요금제</span><b>${TC.num(q.used)} / ${TC.num(q.plan.quota)}건</b><p>이번 달 상담방 사용량</p><div class="meter"><div style="width:${q.pct}%"></div></div></div>`
+    : `<div class="side-card"><span class="eyebrow">Free 테스트</span><b>${left > 0 ? `${left}일 남음` : '기간 종료'}</b><p>${left > 0 ? `${TC.fmtDate(s.trial.endsAt, false)}까지 테스트 채널 무료` : '요금제를 선택하면 운영 채널을 쓸 수 있습니다'}</p><a class="btn sm" href="#/billing">요금제 보기</a></div>`;
+  el.innerHTML = `${card}<div class="side-user"><span class="av">${TC.esc(s.company.name.replace(/^\(주\)\s*/, '').slice(0, 1))}</span><div class="nm"><b>${TC.esc(s.company.name)}</b><span>${TC.esc(s.user.email)}</span></div></div>`;
+}
 
 const activeChannels = s => s.channels.filter(c => c.status === 'active');
 const liveChannels = s => activeChannels(s).filter(c => c.env === 'live');
@@ -70,19 +88,18 @@ function viewDashboard() {
       : `<div class="notice warn">무료 테스트 기간이 끝났습니다. 테스트 채널 발송이 중단되었습니다. <a href="#/billing">요금제 선택</a></div>`}
     ${q && q.level ? `<div class="notice ${q.level}">이번 달 사용량이 ${q.pct}%에 도달했습니다. ${q.level === 'err' ? '운영 채널 발송이 중단되었습니다.' : ''} <a href="#/billing">요금제 변경</a></div>` : ''}
     <div class="grid grid-4" style="margin-bottom:16px">
-      <div class="card stat"><div class="label">연결된 채널</div><div class="value">${activeChannels(s).length}</div><div class="small muted">테스트 ${activeChannels(s).filter(c => c.env === 'test').length} · 운영 ${liveChannels(s).length}</div></div>
-      <div class="card stat"><div class="label">활성 API 토큰</div><div class="value">${s.keys.filter(k => !k.revokedAt).length}</div></div>
-      <div class="card stat"><div class="label">이번 달 상담방</div><div class="value">${TC.num(cycleUsage(s))}</div>
-        ${q ? `<div class="meter ${q.level}"><div style="width:${q.pct}%"></div></div><div class="small muted">${q.plan.name} ${TC.num(q.plan.quota)}건 중 ${q.pct}%</div>` : '<div class="small muted">운영 채널 기준</div>'}</div>
-      <div class="card stat"><div class="label">요금제</div><div class="value" style="font-size:20px">${q ? q.plan.name : 'Free 테스트'}</div><div class="small muted">${q ? TC.won(q.plan.price) + ' / 월' : '카드 등록 없음'}</div></div>
+      ${stat('chat', '연결된 채널', activeChannels(s).length, `<div class="small muted">테스트 ${activeChannels(s).filter(c => c.env === 'test').length} · 운영 ${liveChannels(s).length}</div>`)}
+      ${stat('key', '활성 API 토큰', s.keys.filter(k => !k.revokedAt).length, '<div class="small muted">테스트·운영 합계</div>')}
+      ${stat('chart', '이번 달 상담방', TC.num(cycleUsage(s)), q ? `<div class="meter ${q.level}"><div style="width:${q.pct}%"></div></div><div class="small muted">${q.plan.name} ${TC.num(q.plan.quota)}건 중 ${q.pct}%</div>` : '<div class="small muted">운영 채널 기준</div>')}
+      ${stat('card', '요금제', q ? q.plan.name : 'Free 테스트', `<div class="small muted">${q ? TC.won(q.plan.price) + ' / 월' : '카드 등록 없음'}</div>`, 'font-size:22px')}
     </div>
     <div class="grid grid-2">
       <div class="card">
         <div class="row"><h3 style="margin:0">연동 체크리스트</h3><span class="spacer"></span><span class="badge ${doneCount === checklist.length ? 'ok' : 'primary'}">${doneCount}/${checklist.length}</span></div>
-        <div class="meter" style="margin:12px 0"><div style="width:${doneCount / checklist.length * 100}%"></div></div>
-        ${checklist.map(c => `<div class="row" style="padding:7px 0;border-bottom:1px solid var(--line)">
-          <span class="badge ${c.done ? 'ok' : ''}" style="width:22px;justify-content:center;padding:0">${c.done ? '✓' : ''}</span>
-          <span style="${c.done ? 'color:var(--ink-3)' : ''}">${c.label}</span><span class="spacer"></span>
+        <div class="meter" style="margin:12px 0 6px"><div style="width:${doneCount / checklist.length * 100}%"></div></div>
+        ${checklist.map(c => `<div class="check-row ${c.done ? 'done' : ''}">
+          <span class="ck">${TC.icon('check', '')}</span>
+          <span class="t">${c.label}</span><span class="spacer"></span>
           ${c.done ? '' : `<a class="btn sm" href="${c.href}">진행</a>`}</div>`).join('')}
       </div>
       <div class="card">
@@ -610,7 +627,7 @@ async function choosePlan(p) {
 
 function cardModal(after) {
   TC.modal(`<h3>카드 등록 (모의)</h3>
-    <p class="muted small">실제 서비스에서는 PG사 결제창에서 등록하며 카드번호는 TalkConnector에 저장되지 않습니다.</p>
+    <p class="muted small">실제 서비스에서는 PG사 결제창에서 등록하며 카드번호는 톡커넥터에 저장되지 않습니다.</p>
     <label class="field"><span>카드번호</span><input type="text" id="cn" inputmode="numeric" value="4111 1111 1111 1111"></label>
     <div class="grid grid-2" style="gap:12px"><label class="field"><span>유효기간</span><input type="text" value="12/29"></label><label class="field"><span>생년월일 또는 사업자번호</span><input type="text" value="${TC.esc(S().company.bizNo)}"></label></div>
     <label class="check"><input type="checkbox" id="agr" checked><span>정기결제 및 자동 갱신에 동의합니다.</span></label>
@@ -681,6 +698,7 @@ function route() {
   TC.$$('#sidebar a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#/' + (parts[0] || '')));
   document.getElementById('sidebar').classList.remove('open');
   window.scrollTo(0, 0);
+  renderSideFoot();
   if (!parts.length) return viewDashboard();
   if (parts[0] === 'channels') return parts[1] === 'new' ? viewChannelNew() : parts[1] ? viewChannelDetail(parts[1]) : viewChannels();
   ({ keys: viewKeys, webhook: viewWebhook, usage: viewUsage, billing: viewBilling, settings: viewSettings, audit: viewAudit }[parts[0]] || viewDashboard)();
