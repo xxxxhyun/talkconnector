@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TalkConnector API 문서</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%232f5bea%22/%3E%3Cpath d=%22M6 16h7M19 16h7%22 stroke=%22white%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%223.5%22 fill=%22none%22 stroke=%22white%22 stroke-width=%223%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div id="header"></div>
+<div class="shell">
+<aside class="sidebar" id="sidebar">
+  <div class="group">시작하기</div>
+  <a href="#overview">개요</a>
+  <a href="#quickstart">빠른 시작</a>
+  <a href="#auth">인증</a>
+  <a href="#conventions">요청·응답 규칙</a>
+  <div class="group">API</div>
+  <a href="#me">내 정보</a>
+  <a href="#channels">채널</a>
+  <a href="#messages">메시지 발송</a>
+  <a href="#rich">리치 말풍선</a>
+  <a href="#message-delete">발신 취소</a>
+  <a href="#sessions">상담 세션</a>
+  <a href="#users">고객 차단</a>
+  <a href="#uploads">파일 업로드</a>
+  <a href="#cert">카카오톡 인증</a>
+  <a href="#usage">사용량</a>
+  <div class="group">웹훅</div>
+  <a href="#webhook-setup">설정</a>
+  <a href="#webhook-events">이벤트와 페이로드</a>
+  <a href="#webhook-signature">서명 검증</a>
+  <a href="#webhook-retry">재시도·멱등 처리</a>
+  <div class="group">참고</div>
+  <a href="#errors">오류 코드</a>
+  <a href="#limits">제한 사항</a>
+  <a href="#billing">과금 기준</a>
+  <a href="#glossary">용어집</a>
+  <a href="#changelog">변경 이력</a>
+</aside>
+<main class="main"><div class="page doc">
+
+<section id="overview">
+<h1>TalkConnector API</h1>
+<p>TalkConnector는 카카오 상담톡 API를 셀프서비스로 제공합니다. 카카오 허브파트너 등록, 발신프로필 등록, 수신 도메인 설정, ACL 등록 같은 절차는 TalkConnector가 대신 처리하고, 고객사는 REST API와 서명된 웹훅만 연동합니다.</p>
+<div class="table-wrap"><table>
+<tr><th>구분</th><th>내용</th></tr>
+<tr><td>Base URL</td><td><code>https://api.talkconnector.example</code> <span class="muted small">(정식 도메인 확정 전 가칭)</span></td></tr>
+<tr><td>프로토콜</td><td>HTTPS, JSON (업로드만 multipart/form-data)</td></tr>
+<tr><td>인증</td><td><code>Authorization: Bearer tc_test_...</code> 또는 <code>tc_live_...</code></td></tr>
+<tr><td>수신</td><td>고객사 HTTPS 엔드포인트 1개로 모든 이벤트 전달, HMAC-SHA256 서명</td></tr>
+<tr><td>버전</td><td><code>/v1</code> 경로 버전. 하위 호환이 깨지는 변경은 새 버전으로 제공</td></tr>
+</table></div>
+<h3>카카오 상담톡 API와의 차이</h3>
+<div class="table-wrap"><table>
+<tr><th>항목</th><th>카카오 상담톡 API 직접 연동</th><th>TalkConnector</th></tr>
+<tr><td>사전 준비</td><td>허브파트너 계약, 발신프로필 등록, 수신도메인·ACL 등록</td><td>가입 후 콘솔에서 채널 인증</td></tr>
+<tr><td>식별자</td><td><code>partner_key</code>(경로), <code>sender_key</code>(본문)</td><td><code>channelId</code> 하나</td></tr>
+<tr><td>메시지 일련번호</td><td>고객사가 <code>serial_number</code> 생성</td><td>서버가 생성, 선택적으로 <code>clientMessageId</code>로 중복 방지</td></tr>
+<tr><td>발송 경로</td><td>plain, rich 경로 분리</td><td><code>POST /v1/messages</code> 하나, <code>type</code>으로 구분</td></tr>
+<tr><td>수신</td><td>경로 6개(<code>/message</code>, <code>/reference</code> 등)를 모두 구현</td><td>엔드포인트 1개, <code>type</code>으로 구분, 서명 포함</td></tr>
+<tr><td>테스트</td><td>테스트용 허브파트너 별도 등록</td><td>테스트 채널과 <code>tc_test_</code> 키 즉시 제공</td></tr>
+</table></div>
+</section>
+
+<section id="quickstart">
+<h2>빠른 시작</h2>
+<p>가입부터 첫 테스트 웹훅 수신까지 3분 안에 끝나도록 설계했습니다.</p>
+<ol>
+<li><a href="login.html">가입</a>: 구글 또는 카카오 계정으로 로그인하고 약관에 동의합니다.</li>
+<li><a href="console.html#/channels/new">채널 연결</a>: 카카오톡 채널 검색용 아이디와 관리자 휴대폰으로 인증하면 채널 ID와 테스트 API 키가 발급됩니다.</li>
+<li><a href="console.html#/webhook">웹훅 등록</a>: 수신 URL을 저장하고 테스트 이벤트를 보내 2xx 응답을 확인합니다.</li>
+<li>카카오톡에서 채널에 메시지를 보내면 <code>message</code> 이벤트가 도착합니다. 받은 <code>userKey</code>로 답장합니다.</li>
+</ol>
+<pre>curl -X POST https://api.talkconnector.example/v1/messages \
+  -H "Authorization: Bearer tc_test_xxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "channelId": "ch_8f2k1m9x0a7q",
+    "userKey": "aBcD3fGh12Ij",
+    "type": "text",
+    "text": "안녕하세요. 무엇을 도와드릴까요?"
+  }'</pre>
+<pre>{
+  "ok": true,
+  "data": { "serial": "tc_01JBQ7Y2N4M8", "createdAt": "2026-11-24T10:15:02.511+09:00" },
+  "requestId": "req_7Hq2Lr0pXz"
+}</pre>
+</section>
+
+<section id="auth">
+<h2>인증</h2>
+<p>모든 요청은 <code>Authorization</code> 헤더에 API 키를 Bearer 토큰으로 넣습니다. 키가 없거나 폐기되었으면 <code>401 UNAUTHORIZED</code>를 반환합니다.</p>
+<pre>Authorization: Bearer tc_live_9xK2mQ7vR4tY8wZ1aB3cD5eF6gH0jL2n</pre>
+<h3>키 종류</h3>
+<div class="table-wrap"><table>
+<tr><th>키</th><th>형식</th><th>용도</th></tr>
+<tr><td>테스트 API 키</td><td><code>tc_test_</code> + 32자</td><td>테스트 채널 호출. 과금 없음</td></tr>
+<tr><td>운영 API 키</td><td><code>tc_live_</code> + 32자</td><td>운영 채널 호출. 상담방 과금</td></tr>
+<tr><td>웹훅 서명 키</td><td><code>whsec_</code> + 32자</td><td>수신 웹훅 서명 검증. 고객사별 발급</td></tr>
+<tr><td>채널 ID</td><td><code>ch_</code> + 12자</td><td>요청 대상 채널 지정</td></tr>
+</table></div>
+<p>테스트 키로 운영 채널을, 운영 키로 테스트 채널을 호출하면 <code>403 ENV_MISMATCH</code>를 반환합니다.</p>
+<h3>권한 범위</h3>
+<div class="table-wrap"><table>
+<tr><th>권한</th><th>허용 작업</th></tr>
+<tr><td><code>read</code> 조회</td><td>내 정보, 채널, 상담 세션, 인증 상태, 사용량 조회</td></tr>
+<tr><td><code>write</code> 발송</td><td>조회 + 메시지 발송·발신 취소, 읽음 처리, 상담 종료·연장, 고객 차단, 파일 업로드</td></tr>
+<tr><td><code>admin</code> 관리</td><td>발송 + 상담시간 변경</td></tr>
+</table></div>
+<h3>키 관리 원칙</h3>
+<ul>
+<li>키는 발급 직후 한 번만 전체 표시되며 서버에는 해시로만 저장됩니다.</li>
+<li>재발급하면 기존 키는 즉시 폐기됩니다. 무중단 교체가 필요하면 새 키를 추가 발급해 배포한 뒤 기존 키를 폐기하세요.</li>
+<li>키 발급·폐기, 서명 키 조회는 콘솔 접근 이력에 기록됩니다.</li>
+<li>키를 브라우저나 앱에 넣지 마세요. 서버에서만 호출해야 합니다.</li>
+</ul>
+</section>
+
+<section id="conventions">
+<h2>요청·응답 규칙</h2>
+<p>모든 응답은 같은 봉투를 씁니다. HTTP 상태 코드와 <code>ok</code> 값을 함께 확인하세요.</p>
+<pre>// 성공
+{ "ok": true, "data": { ... }, "requestId": "req_7Hq2Lr0pXz" }
+
+// 실패
+{
+  "ok": false,
+  "error": {
+    "code": "NO_SESSION",
+    "message": "상담 세션이 없는 고객에게는 메시지를 보낼 수 없습니다.",
+    "kakaoCode": null
+  },
+  "requestId": "req_7Hq2Lr0pXz"
+}</pre>
+<ul>
+<li><code>requestId</code>: 문의 시 함께 알려 주세요. 응답 헤더 <code>X-Request-Id</code>에도 있습니다.</li>
+<li><code>kakaoCode</code>: 카카오 상담톡 API가 오류를 반환한 경우 원본 코드를 그대로 전달합니다.</li>
+<li>시각은 ISO 8601, 한국 표준시(+09:00)로 표시합니다.</li>
+<li>호출 한도를 넘으면 <code>429 RATE_LIMITED</code>와 <code>Retry-After</code> 헤더(초)를 반환합니다. 테스트 키 초당 10건, 운영 키 초당 50건.</li>
+</ul>
+</section>
+
+<section id="me">
+<h2>내 정보</h2>
+<div class="endpoint"><span class="method get">GET</span>/v1/me</div>
+<p>키 정보와 이 키로 호출할 수 있는 채널 목록을 반환합니다. 연동 첫 단계에서 키와 채널 ID를 확인할 때 사용하세요.</p>
+<pre>{
+  "ok": true,
+  "data": {
+    "key": { "name": "테스트 기본 키", "env": "test", "scope": "write", "last4": "0j2n" },
+    "account": { "company": "(주)예시컴퍼니", "plan": "standard" },
+    "channels": [
+      { "channelId": "ch_8f2k1m9x0a7q", "searchId": "@mybrand", "env": "test", "status": "active" }
+    ]
+  },
+  "requestId": "req_..."
+}</pre>
+</section>
+
+<section id="channels">
+<h2>채널</h2>
+<p>채널 등록, 상담톡 활성화와 이용 중지는 콘솔에서만 할 수 있습니다. API는 조회와 상담시간 설정을 제공합니다.</p>
+<div class="endpoint"><span class="method get">GET</span>/v1/channels</div>
+<div class="endpoint"><span class="method get">GET</span>/v1/channels/{channelId}</div>
+<pre>{
+  "ok": true,
+  "data": {
+    "channelId": "ch_8f2k1m9x0a7q",
+    "searchId": "@mybrand",
+    "name": "마이브랜드",
+    "env": "live",
+    "status": "active",
+    "chatEnabled": true,
+    "createdAt": "2026-11-20T14:02:11+09:00"
+  }
+}</pre>
+<h3>상담시간</h3>
+<div class="endpoint"><span class="method get">GET</span>/v1/channels/{channelId}/consult-hours</div>
+<div class="endpoint"><span class="method put">PUT</span>/v1/channels/{channelId}/consult-hours <span class="badge">admin</span></div>
+<p>상담시간 외에 들어온 고객 메시지에는 카카오 시스템 메시지(상담 부재)가 자동 발송됩니다. 시스템 메시지는 과금되지 않습니다.</p>
+<pre>{
+  "week": [
+    { "day": "mon", "start": "09:00", "end": "18:00" },
+    { "day": "tue", "start": "09:00", "end": "18:00" },
+    { "day": "wed", "start": "09:00", "end": "18:00" },
+    { "day": "thu", "start": "09:00", "end": "18:00" },
+    { "day": "fri", "start": "09:00", "end": "18:00" }
+  ]
+}</pre>
+<p>목록에 없는 요일은 상담하지 않는 날입니다. 24시간 상담은 <code>start</code>와 <code>end</code>를 모두 <code>"00:00"</code>으로 지정합니다.</p>
+</section>
+
+<section id="messages">
+<h2>메시지 발송</h2>
+<div class="endpoint"><span class="method post">POST</span>/v1/messages <span class="badge">write</span></div>
+<p>상담 세션이 열린 고객에게 메시지를 보냅니다. 세션은 고객이 채널 채팅방에 메시지를 보내거나 상담 연결 버튼을 누르면 생성됩니다. 세션이 없으면 <code>409 NO_SESSION</code>을 반환합니다.</p>
+<h3>요청 본문</h3>
+<div class="table-wrap"><table>
+<tr><th>필드</th><th>타입</th><th>필수</th><th>설명</th></tr>
+<tr><td><code>channelId</code></td><td>string</td><td>O</td><td>채널 ID</td></tr>
+<tr><td><code>userKey</code></td><td>string</td><td>O</td><td>웹훅으로 받은 고객 키</td></tr>
+<tr><td><code>type</code></td><td>string</td><td>O</td><td><code>text</code> <code>image</code> <code>video</code> <code>audio</code> <code>file</code> <code>rich</code></td></tr>
+<tr><td><code>text</code></td><td>string</td><td>-</td><td><code>text</code>일 때 필수. 최대 1,000자</td></tr>
+<tr><td><code>imageUrl</code></td><td>string</td><td>-</td><td><code>image</code>일 때 필수. <a href="#uploads">이미지 업로드</a>로 받은 URL</td></tr>
+<tr><td><code>file</code></td><td>object</td><td>-</td><td><code>video</code> <code>audio</code> <code>file</code>일 때 필수. <code>{ url, name, size }</code>, <code>name</code>과 <code>size</code>는 <code>file</code>일 때 필수</td></tr>
+<tr><td><code>rich</code></td><td>object</td><td>-</td><td><code>rich</code>일 때 필수. <a href="#rich">리치 말풍선</a> 참고</td></tr>
+<tr><td><code>clientMessageId</code></td><td>string(30)</td><td>X</td><td>고객사 메시지 ID. 24시간 안에 같은 값으로 다시 요청하면 처음 결과를 그대로 반환합니다</td></tr>
+</table></div>
+<h3>예시</h3>
+<pre>// 이미지
+{ "channelId": "ch_8f2k1m9x0a7q", "userKey": "aBcD3fGh12Ij",
+  "type": "image", "imageUrl": "https://files.talkconnector.example/img/1a2b3c.png" }
+
+// 파일
+{ "channelId": "ch_8f2k1m9x0a7q", "userKey": "aBcD3fGh12Ij",
+  "type": "file",
+  "file": { "url": "https://files.talkconnector.example/f/9z8y.pdf", "name": "견적서.pdf", "size": 182044 } }</pre>
+<h3>응답</h3>
+<pre>{ "ok": true, "data": { "serial": "tc_01JBQ7Y2N4M8", "createdAt": "2026-11-24T10:15:02.511+09:00" } }</pre>
+<p><code>serial</code>은 발신 취소에 사용합니다. 카카오에 전달하는 <code>serial_number</code>와 같은 값입니다.</p>
+</section>
+
+<section id="rich">
+<h2>리치 말풍선</h2>
+<p><code>type: "rich"</code>일 때 <code>rich.bubbleType</code>으로 말풍선 종류를 고릅니다. 리치 말풍선은 기기 글꼴 설정과 관계없이 일정한 크기로 보입니다.</p>
+<div class="table-wrap"><table>
+<tr><th>bubbleType</th><th>구성</th><th>제약</th></tr>
+<tr><td><code>TEXT</code></td><td>메시지 + 버튼 + 쿠폰</td><td>메시지 최대 1,000자, 줄바꿈 33개</td></tr>
+<tr><td><code>IMAGE</code></td><td>이미지 + 메시지 + 버튼 + 쿠폰</td><td>이미지·메시지 필수</td></tr>
+<tr><td><code>WIDE</code></td><td>와이드 이미지 + 메시지 + 버튼 + 쿠폰</td><td>메시지 최대 76자, 줄바꿈 1개, 버튼 최대 2개</td></tr>
+<tr><td><code>ITEM_LIST</code></td><td>이미지 + 헤더 + 하이라이트 + 아이템 + 요약 + 메시지 + 버튼</td><td>아이템 2~10개, 제목 6자, 설명 23자, 메시지 700자</td></tr>
+<tr><td><code>WIDE_ITEM_LIST</code></td><td>헤더 + 아이템 3~4개 + 버튼 + 쿠폰</td><td>헤더·아이템 필수, 버튼 최대 2개</td></tr>
+<tr><td><code>CAROUSEL_FEED</code></td><td>캐러셀 2~6개 + 더보기</td><td>버튼 최대 2개</td></tr>
+<tr><td><code>PERSONAL</code></td><td>개인정보 제공 동의 요청 (고정 문구)</td><td>세션당 1회, 동의 유효 3일, 결과는 <code>personal_info</code> 웹훅</td></tr>
+<tr><td><code>KAKAO_CERT</code></td><td>카카오톡 본인 인증 (고정 문구)</td><td>별도 계약·화이트리스트 필요, <code>certExpiry</code> 5~20분, 결과는 <code>cert_result</code> 웹훅</td></tr>
+</table></div>
+<h3>버튼과 바로연결</h3>
+<div class="table-wrap"><table>
+<tr><th>type</th><th>동작</th><th>필수 값</th></tr>
+<tr><td><code>WL</code></td><td>웹 링크 이동</td><td><code>urlMobile</code></td></tr>
+<tr><td><code>AL</code></td><td>앱 스킴 또는 웹 링크</td><td><code>schemeAndroid</code> <code>schemeIos</code> <code>urlMobile</code> 중 2개 이상</td></tr>
+<tr><td><code>BK</code></td><td>버튼 문구를 고객 메시지로 발송</td><td>선택: <code>extra</code></td></tr>
+<tr><td><code>MD</code></td><td>버튼 문구 + 메시지 본문 발송</td><td>선택: <code>extra</code></td></tr>
+<tr><td><code>BT</code></td><td>봇 상담으로 전환 (상담 세션 종료)</td><td>선택: <code>extra</code> <code>chatEvent</code></td></tr>
+<tr><td><code>AC</code></td><td>채널 추가 (강조 버튼)</td><td>이름 "채널 추가" 고정</td></tr>
+<tr><td><code>BF</code></td><td>카카오 비즈니스폼 실행</td><td><code>bizFormKey</code></td></tr>
+</table></div>
+<p>버튼 이름은 최대 28자이며 쿠폰이 있으면 최대 4개, 없으면 최대 5개(와이드 계열 2개)입니다. 바로연결(<code>quickReplies</code>)은 최대 10개입니다. <code>BK</code> <code>MD</code> 버튼의 <code>extra</code>는 고객이 누르면 <code>message</code> 웹훅의 <code>data.extra</code>로 돌아옵니다.</p>
+<pre>{
+  "channelId": "ch_8f2k1m9x0a7q",
+  "userKey": "aBcD3fGh12Ij",
+  "type": "rich",
+  "rich": {
+    "bubbleType": "TEXT",
+    "message": "주문하신 상품의 배송 상태를 확인하시겠어요?",
+    "buttons": [
+      { "type": "WL", "name": "배송 조회", "urlMobile": "https://shop.example.com/orders/1234" },
+      { "type": "BK", "name": "상담원 연결", "extra": "agent_request" }
+    ],
+    "quickReplies": [
+      { "type": "BK", "name": "교환", "extra": "exchange" },
+      { "type": "BK", "name": "반품", "extra": "return" }
+    ]
+  }
+}</pre>
+<p>리치 본문이 형식에 맞지 않으면 <code>400 INVALID_RICH</code>와 함께 문제가 된 필드 경로를 <code>error.field</code>로 반환합니다. 리치 이미지는 업로드 시 <code>purpose</code>를 말풍선 종류에 맞게 지정해야 합니다.</p>
+<h3>자동 응답 문구</h3>
+<p><code>bubbleType: "TEXT"</code>에 <code>autoAnswer</code>를 지정하면 시스템 자동 응답으로 분류됩니다: <code>S1</code> 상담 불가, <code>S2</code> 상담 부재, <code>S3</code> 무응답 상담 종료, <code>S4</code> 상담 대기, <code>S5</code> 금칙어 상담 불가.</p>
+</section>
+
+<section id="message-delete">
+<h2>발신 취소</h2>
+<div class="endpoint"><span class="method post">POST</span>/v1/messages/delete <span class="badge">write</span></div>
+<pre>{ "channelId": "ch_8f2k1m9x0a7q", "userKey": "aBcD3fGh12Ij", "serial": "tc_01JBQ7Y2N4M8" }</pre>
+<p>보낸 말풍선을 고객 채팅방에서 삭제합니다. 발신 취소해도 해당 세션의 상담방 과금은 취소되지 않습니다.</p>
+</section>
+
+<section id="sessions">
+<h2>상담 세션</h2>
+<div class="endpoint"><span class="method get">GET</span>/v1/sessions?channelId={channelId}&amp;userKey={userKey}</div>
+<pre>{
+  "ok": true,
+  "data": {
+    "sessionId": "29153",
+    "active": true,
+    "expiresAt": "2026-12-24T16:00:00+09:00"
+  }
+}</pre>
+<p>세션은 고객의 마지막 메시지 시각 기준 다음 정각부터 30일간 유지되고 고객 메시지가 올 때마다 연장됩니다.</p>
+<div class="table-wrap"><table>
+<tr><th>메서드·경로</th><th>권한</th><th>설명</th><th>본문</th></tr>
+<tr><td><code>POST /v1/sessions/read</code></td><td>write</td><td>고객 메시지 읽음 처리</td><td><code>channelId</code> <code>userKey</code></td></tr>
+<tr><td><code>POST /v1/sessions/end</code></td><td>write</td><td>상담 종료</td><td><code>channelId</code> <code>userKey</code></td></tr>
+<tr><td><code>POST /v1/sessions/end-with-bot</code></td><td>write</td><td>상담 종료 후 봇 이벤트 블록 실행</td><td><code>channelId</code> <code>userKey</code> <code>botEvent</code></td></tr>
+<tr><td><code>POST /v1/sessions/extend</code></td><td>write</td><td>세션 연장. <code>message</code> 또는 <code>rich</code>를 함께 보내면 연장 안내 메시지 발송</td><td><code>channelId</code> <code>userKey</code> 선택: <code>text</code> <code>rich</code></td></tr>
+</table></div>
+<p>세션 종료 조건: 상담 종료 API, 고객 차단, 고객의 "!종료" 입력, 채팅방 나가기, 고객의 채널 차단, 마지막 메시지 후 30일 경과. 종료되면 <code>session.ended</code> 이벤트가 전달됩니다.</p>
+</section>
+
+<section id="users">
+<h2>고객 차단</h2>
+<div class="endpoint"><span class="method post">POST</span>/v1/users/block <span class="badge">write</span></div>
+<div class="endpoint"><span class="method post">POST</span>/v1/users/unblock <span class="badge">write</span></div>
+<pre>{ "channelId": "ch_8f2k1m9x0a7q", "userKey": "aBcD3fGh12Ij" }</pre>
+<p>차단하면 진행 중인 세션이 종료되고 고객 메시지를 받지 않습니다. 차단과 해제로 <code>userKey</code>는 바뀌지 않습니다.</p>
+</section>
+
+<section id="uploads">
+<h2>파일 업로드</h2>
+<p>이미지와 파일은 먼저 업로드하고 받은 URL로 발송합니다.</p>
+<div class="endpoint"><span class="method post">POST</span>/v1/uploads/image <span class="badge">write</span></div>
+<div class="table-wrap"><table>
+<tr><th>필드</th><th>설명</th></tr>
+<tr><td><code>channelId</code></td><td>채널 ID</td></tr>
+<tr><td><code>file</code></td><td>jpg, png, gif. 최대 5MB</td></tr>
+<tr><td><code>purpose</code></td><td><code>plain</code>(일반 이미지 메시지) <code>rich</code>(IMAGE, ITEM_LIST) <code>wide</code>(WIDE, 가로:세로 2:1 이상 1:1 이하) <code>wide_item</code> <code>carousel</code></td></tr>
+</table></div>
+<pre>curl -X POST https://api.talkconnector.example/v1/uploads/image \
+  -H "Authorization: Bearer tc_test_..." \
+  -F channelId=ch_8f2k1m9x0a7q -F purpose=plain -F file=@banner.png
+
+{ "ok": true, "data": { "url": "https://files.talkconnector.example/img/1a2b3c.png" } }</pre>
+<div class="endpoint"><span class="method post">POST</span>/v1/uploads/file <span class="badge">write</span></div>
+<p><code>kind</code>: <code>file</code>(최대 300MB) <code>video</code>(최대 300MB) <code>audio</code>(최대 10MB). 동영상과 오디오는 <code>kind</code>를 맞춰 올려야 해당 말풍선으로 보입니다. 큰 파일은 비동기로 처리되므로 <code>uploadId</code>로 상태를 확인합니다.</p>
+<div class="endpoint"><span class="method get">GET</span>/v1/uploads/{uploadId}</div>
+<pre>{ "ok": true, "data": { "uploadId": "up_4Rk2", "status": "done", "url": "https://files.talkconnector.example/f/9z8y.mp4", "size": 824211 } }</pre>
+</section>
+
+<section id="cert">
+<h2>카카오톡 인증</h2>
+<div class="endpoint"><span class="method get">GET</span>/v1/cert/status?channelId={channelId}&amp;userKey={userKey}</div>
+<p><code>KAKAO_CERT</code> 말풍선 발송 후 인증 진행 상태를 조회합니다. 인증 결과는 암호화되어 <code>cert_result</code> 웹훅으로 전달되며, 고객사는 식별 즉시 파기해야 합니다. 카카오톡 인증은 별도 계약과 채널 화이트리스트 등록이 필요하므로 도입 문의로 신청하세요. 인증 완료 건당 별도 과금됩니다.</p>
+</section>
+
+<section id="usage">
+<h2>사용량</h2>
+<div class="endpoint"><span class="method get">GET</span>/v1/usage?from=2026-11-01&amp;to=2026-11-30&amp;channelId={channelId}</div>
+<pre>{
+  "ok": true,
+  "data": {
+    "plan": { "id": "standard", "quota": 500, "used": 412, "periodEnd": "2026-12-01T04:00:00+09:00" },
+    "daily": [ { "date": "2026-11-01", "rooms": 14 }, { "date": "2026-11-02", "rooms": 9 } ]
+  }
+}</pre>
+<p>사용량은 카카오 상담톡 세션 통계를 기준으로 매일 04시에 전날 분을 확정합니다. 당일 수치는 잠정치입니다.</p>
+</section>
+
+<section id="webhook-setup">
+<h2>웹훅 설정</h2>
+<p><a href="console.html#/webhook">콘솔 웹훅 메뉴</a>에서 HTTPS 엔드포인트 1개와 받을 이벤트를 고릅니다. 모든 채널의 이벤트가 같은 엔드포인트로 오며 <code>channelId</code>로 구분합니다.</p>
+<ul>
+<li>5초 안에 2xx로 응답하세요. 무거운 처리는 큐에 넣고 바로 응답하는 방식을 권장합니다.</li>
+<li>카카오 수신 이벤트는 순서를 보장하지 않습니다. 정렬이 필요하면 <code>data.time</code>(카카오 서버 시각)을 기준으로 하세요.</li>
+<li>테스트 이벤트는 <code>"test": true</code>가 붙고 <code>userKey</code>가 <code>tc-test-</code>로 시작합니다. 이 고객에게는 답장할 수 없습니다.</li>
+<li>상담 메시지는 카카오에 3일만 보관됩니다. 받은 내용과 첨부 파일은 즉시 고객사에 저장하세요. 첨부 URL은 만료 시각이 있습니다.</li>
+</ul>
+<h3>요청 헤더</h3>
+<div class="table-wrap"><table>
+<tr><th>헤더</th><th>설명</th></tr>
+<tr><td><code>Content-Type</code></td><td><code>application/json</code></td></tr>
+<tr><td><code>X-TC-Event</code></td><td>이벤트 종류. 본문 <code>type</code>과 같음</td></tr>
+<tr><td><code>X-TC-Delivery</code></td><td>이벤트 ID. 재시도해도 같은 값</td></tr>
+<tr><td><code>X-TC-Signature</code></td><td><code>t=&lt;unix초&gt;,v1=&lt;hex&gt;</code>. 서명 키 교체 중에는 <code>v1</code>이 2개 올 수 있음</td></tr>
+</table></div>
+</section>
+
+<section id="webhook-events">
+<h2>이벤트와 페이로드</h2>
+<pre>{
+  "id": "evt_2Lk9qW7xR1mN4bV8cZ0p",
+  "type": "message",
+  "createdAt": "2026-11-24T10:14:58.120+09:00",
+  "livemode": true,
+  "channelId": "ch_8f2k1m9x0a7q",
+  "userKey": "aBcD3fGh12Ij",
+  "sessionId": "29153",
+  "data": { ... }
+}</pre>
+<div class="table-wrap"><table>
+<tr><th>type</th><th>발생 시점</th><th>카카오 원본</th></tr>
+<tr><td><code>message</code></td><td>고객이 메시지 전송</td><td><code>/message</code></td></tr>
+<tr><td><code>session.started</code></td><td>고객이 상담 연결 (버튼 또는 채팅방 진입)</td><td><code>/reference</code></td></tr>
+<tr><td><code>session.ended</code></td><td>상담 세션 종료</td><td><code>/expired_session</code></td></tr>
+<tr><td><code>message.read</code></td><td>고객이 상담원 메시지를 읽음</td><td><code>/seen_info</code></td></tr>
+<tr><td><code>personal_info</code></td><td>고객이 개인정보 제공에 동의</td><td><code>/personal_info</code></td></tr>
+<tr><td><code>cert_result</code></td><td>고객이 카카오톡 인증 완료</td><td><code>/cert_result</code></td></tr>
+</table></div>
+<h3>message</h3>
+<pre>"data": {
+  "serial": "3348262546089559600",
+  "time": 1793232898120,
+  "kind": "text",              // text | photo | video | audio | file
+  "text": "배송 언제 오나요?",
+  "attachments": [],           // photo 등: [{ "url": "...", "comment": "" }]
+  "longTextUrl": null,         // 4,000자 초과 시 전체 본문 txt URL
+  "extra": "agent_request"     // BK, MD 버튼으로 보낸 경우
+}</pre>
+<h3>session.started</h3>
+<pre>"data": {
+  "extra": "order_1234",       // 상담 연결 링크의 extra
+  "appUserId": null,
+  "lastReference": null        // extra가 없을 때 가장 최근 연결 정보 { extra, bot, botEvent, createdAt }
+}</pre>
+<h3>session.ended, message.read</h3>
+<pre>// session.ended
+"data": { "endedAt": "2026-11-24T10:30:00+09:00" }
+
+// message.read: 고객이 채팅방을 읽은 시각
+"data": { "readAt": "2026-11-24T10:20:03+09:00" }</pre>
+<p>카카오는 세션 종료 사유를 전달하지 않습니다. 상담 종료 API나 차단으로 직접 종료한 경우는 고객사 기록과 대조하세요.</p>
+<h3>personal_info</h3>
+<pre>"data": { "phone": "010-1234-5678", "nickname": "홍길동", "consentedAt": "2026-11-24T10:21:40+09:00" }</pre>
+<p>TalkConnector는 개인정보를 저장하지 않고 전달만 합니다. 재시도가 끝나면 폐기되므로 받는 즉시 보관하고, 상담 종료 후 지체 없이 파기하세요.</p>
+<h3>cert_result</h3>
+<pre>"data": { "certTxId": "ctx_8a1b...", "encrypted": "eyJhbGciOi...", "certifiedAt": "2026-11-24T10:22:11+09:00" }</pre>
+<p>복호화하면 성명, 전화번호, 생년월일, 성별, 내외국인 여부(허가된 채널은 CI 포함)를 얻습니다. 복호화 키는 카카오톡 인증 계약 시 별도로 전달합니다.</p>
+</section>
+
+<section id="webhook-signature">
+<h2>서명 검증</h2>
+<p>서명 대상은 <code>{t}.{원본 요청 본문}</code>이며 웹훅 서명 키로 HMAC-SHA256을 계산한 hex 값이 <code>v1</code>입니다. JSON을 다시 직렬화하지 말고 받은 바이트 그대로 검증하세요. <code>t</code>가 현재 시각과 5분 이상 차이 나면 거부해 재전송 공격을 막습니다.</p>
+<h3>Node.js</h3>
+<pre>import crypto from 'node:crypto';
+
+export function verify(rawBody, header, secret) {
+  const parts = Object.fromEntries(header.split(',').map(p => p.split('=')));
+  const t = Number(parts.t);
+  if (Math.abs(Date.now() / 1000 - t) > 300) return false;
+  const expected = crypto.createHmac('sha256', secret).update(`${t}.${rawBody}`).digest('hex');
+  const sigs = header.split(',').filter(p => p.startsWith('v1=')).map(p => p.slice(3));
+  return sigs.some(s => s.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(s), Buffer.from(expected)));
+}
+
+// Express: 원본 본문 보존
+app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  if (!verify(req.body.toString('utf8'), req.get('X-TC-Signature'), process.env.TC_WEBHOOK_SECRET)) {
+    return res.sendStatus(400);
+  }
+  const event = JSON.parse(req.body);
+  queue.push(event);   // 처리는 비동기로
+  res.sendStatus(200);
+});</pre>
+<h3>Python</h3>
+<pre>import hmac, hashlib, time
+
+def verify(raw_body: bytes, header: str, secret: str) -> bool:
+    items = [p.split("=", 1) for p in header.split(",")]
+    t = int(dict(items)["t"])
+    if abs(time.time() - t) > 300:
+        return False
+    expected = hmac.new(secret.encode(), f"{t}.".encode() + raw_body, hashlib.sha256).hexdigest()
+    return any(k == "v1" and hmac.compare_digest(v, expected) for k, v in items)</pre>
+<h3>Java</h3>
+<pre>public static boolean verify(String rawBody, String header, String secret) throws Exception {
+    long t = 0; List&lt;String&gt; sigs = new ArrayList&lt;&gt;();
+    for (String p : header.split(",")) {
+        String[] kv = p.split("=", 2);
+        if (kv[0].equals("t")) t = Long.parseLong(kv[1]);
+        if (kv[0].equals("v1")) sigs.add(kv[1]);
+    }
+    if (Math.abs(Instant.now().getEpochSecond() - t) &gt; 300) return false;
+    Mac mac = Mac.getInstance("HmacSHA256");
+    mac.init(new SecretKeySpec(secret.getBytes(UTF_8), "HmacSHA256"));
+    String expected = HexFormat.of().formatHex(mac.doFinal((t + "." + rawBody).getBytes(UTF_8)));
+    for (String s : sigs)
+        if (MessageDigest.isEqual(s.getBytes(UTF_8), expected.getBytes(UTF_8))) return true;
+    return false;
+}</pre>
+</section>
+
+<section id="webhook-retry">
+<h2>재시도·멱등 처리</h2>
+<ul>
+<li>5초 안에 2xx 응답이 없으면 1분, 5분, 30분, 2시간, 6시간 간격으로 최대 5회 재시도합니다.</li>
+<li>재시도해도 <code>id</code>(<code>X-TC-Delivery</code>)는 같습니다. 처리한 <code>id</code>를 저장해 중복을 거르세요.</li>
+<li>모든 재시도가 실패한 이벤트는 콘솔 전송 이력에서 확인하고 수동 재전송할 수 있습니다. 보관 기간 3일.</li>
+<li>24시간 동안 연속 실패하면 담당자 이메일로 알리고, 72시간 연속 실패하면 웹훅을 일시 중지합니다.</li>
+</ul>
+</section>
+
+<section id="errors">
+<h2>오류 코드</h2>
+<div class="table-wrap"><table>
+<tr><th>HTTP</th><th>code</th><th>의미와 조치</th></tr>
+<tr><td>400</td><td><code>INVALID_PARAM</code></td><td>필수 값 누락이나 형식 오류. <code>error.field</code> 확인</td></tr>
+<tr><td>400</td><td><code>INVALID_RICH</code></td><td>리치 말풍선 구조 오류 (버튼 수, 글자 수, 이미지 비율 등)</td></tr>
+<tr><td>401</td><td><code>UNAUTHORIZED</code></td><td>키 누락, 형식 오류, 폐기된 키</td></tr>
+<tr><td>402</td><td><code>QUOTA_EXCEEDED</code></td><td>요금제 상담방 소진. 요금제를 올리면 즉시 재개</td></tr>
+<tr><td>402</td><td><code>TRIAL_EXPIRED</code></td><td>무료 테스트 기간 종료</td></tr>
+<tr><td>403</td><td><code>FORBIDDEN_SCOPE</code></td><td>키 권한 부족 (예: read 키로 발송)</td></tr>
+<tr><td>403</td><td><code>CHANNEL_NOT_ALLOWED</code></td><td>이 계정의 채널이 아니거나 이용 중지된 채널</td></tr>
+<tr><td>403</td><td><code>ENV_MISMATCH</code></td><td>테스트 키와 운영 채널 혼용</td></tr>
+<tr><td>404</td><td><code>NOT_FOUND</code></td><td>채널, 업로드, 메시지를 찾을 수 없음</td></tr>
+<tr><td>409</td><td><code>NO_SESSION</code></td><td>상담 세션이 없는 고객. 고객이 먼저 메시지를 보내야 함</td></tr>
+<tr><td>409</td><td><code>ALREADY_SENT</code></td><td>세션당 1회 말풍선(PERSONAL, KAKAO_CERT) 중복 발송</td></tr>
+<tr><td>413</td><td><code>FILE_TOO_LARGE</code></td><td>파일 용량 초과</td></tr>
+<tr><td>429</td><td><code>RATE_LIMITED</code></td><td>호출 한도 초과. <code>Retry-After</code> 후 재시도</td></tr>
+<tr><td>502</td><td><code>KAKAO_ERROR</code></td><td>카카오 API 오류. <code>error.kakaoCode</code>에 원본 코드</td></tr>
+<tr><td>503</td><td><code>UNAVAILABLE</code></td><td>점검 또는 일시 장애. 지수 백오프로 재시도</td></tr>
+</table></div>
+</section>
+
+<section id="limits">
+<h2>제한 사항</h2>
+<div class="table-wrap"><table>
+<tr><th>항목</th><th>제한</th></tr>
+<tr><td>텍스트 메시지</td><td>1,000자</td></tr>
+<tr><td>이미지 발송</td><td>jpg, png, gif, 5MB</td></tr>
+<tr><td>파일·동영상 발송</td><td>300MB</td></tr>
+<tr><td>오디오 발송</td><td>10MB</td></tr>
+<tr><td>고객이 보내는 파일</td><td>이미지 모바일 15MB, 동영상·파일 300MB (iOS는 일반 파일 미지원)</td></tr>
+<tr><td>고객 메시지 길이</td><td>4,000자 초과분은 <code>longTextUrl</code>로 전달</td></tr>
+<tr><td>상담 세션</td><td>마지막 고객 메시지 후 다음 정각부터 30일</td></tr>
+<tr><td>카카오 메시지 보관</td><td>3일</td></tr>
+<tr><td>호출 한도</td><td>테스트 초당 10건, 운영 초당 50건 (Enterprise 조정 가능)</td></tr>
+</table></div>
+</section>
+
+<section id="billing">
+<h2>과금 기준</h2>
+<ul>
+<li>과금 단위는 상담방 1건이며, 상담원(API)이 메시지를 1회 이상 보낸 상담 세션 1개를 의미합니다. 같은 세션에서 메시지를 여러 번 보내도 1건입니다.</li>
+<li>시스템 메시지(상담 부재 등 카카오 자동 발송)는 과금에서 제외됩니다.</li>
+<li>카카오 상담톡 세션 통계 기준으로 매일 04시에 집계합니다.</li>
+<li>선불 월 요금제 Starter 100건, Basic 300건, Standard 500건, Pro 1,000건. 부가세 별도.</li>
+<li>사용량 80%와 소진 시 알림. 소진되면 <code>402 QUOTA_EXCEEDED</code>로 발송이 중단됩니다. Enterprise는 중단 없이 후불 정산.</li>
+<li>테스트 채널은 무료 기간(가입일로부터 1개월) 동안 과금되지 않습니다. 무료 이력은 사업자번호 기준 1회.</li>
+</ul>
+</section>
+
+<section id="glossary">
+<h2>용어집</h2>
+<div class="table-wrap"><table>
+<tr><th>용어</th><th>설명</th></tr>
+<tr><td>상담 세션</td><td>상담원이 고객에게 메시지를 보낼 수 있는 상태. 고객의 메시지나 상담 연결로 생성</td></tr>
+<tr><td>userKey</td><td>카카오가 채널별로 발급하는 고객 식별자. 대소문자 구분, 채널이 다르면 같은 사람도 다른 값, 카카오톡 탈퇴 후 재가입 시 변경</td></tr>
+<tr><td>상담원</td><td>API로 메시지를 보내는 주체. 사람이든 시스템이든 API 발송은 모두 상담원 발송으로 분류</td></tr>
+<tr><td>상담 메시지</td><td>상담원과 고객이 주고받은 메시지. 카카오에 3일 보관</td></tr>
+<tr><td>상담방</td><td>TalkConnector 과금 단위. 상담원이 메시지를 보낸 세션 1개</td></tr>
+<tr><td>채널 ID</td><td>TalkConnector가 발급하는 채널 식별자(<code>ch_</code>). 카카오 발신프로필 키를 대신함</td></tr>
+<tr><td>발신프로필</td><td>카카오 비즈메시지에 등록된 카카오톡 채널. TalkConnector가 위탁사로 등록</td></tr>
+<tr><td>허브파트너</td><td>카카오와 계약한 비즈메시지 사업자. TalkConnector가 이 역할을 맡음</td></tr>
+<tr><td>시스템 메시지</td><td>상담 부재, 상담 종료 등 카카오가 상황에 따라 자동 발송하는 안내. 과금 제외</td></tr>
+<tr><td>extra</td><td>상담 연결 링크나 버튼에 넣는 메타 정보. 개인정보 포함 금지</td></tr>
+</table></div>
+</section>
+
+<section id="changelog">
+<h2>변경 이력</h2>
+<div class="table-wrap"><table>
+<tr><th>날짜</th><th>내용</th></tr>
+<tr><td>2026-10-29</td><td>v1 초안 공개 (프로토타입)</td></tr>
+</table></div>
+</section>
+
+</div></main>
+</div>
+<script src="assets/js/common.js"></script>
+<script>
+TC.mountChrome();
+const links = TC.$$('#sidebar a');
+const secs = TC.$$('.doc section');
+const spy = () => {
+  let cur = secs[0].id;
+  secs.forEach(s => { if (s.getBoundingClientRect().top < 120) cur = s.id; });
+  links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+};
+document.addEventListener('scroll', spy, { passive: true });
+links.forEach(a => a.addEventListener('click', () => document.getElementById('sidebar').classList.remove('open')));
+spy();
+</script>
+</body>
+</html>

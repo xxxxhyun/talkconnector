@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TalkConnector 시작하기</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%232f5bea%22/%3E%3Cpath d=%22M6 16h7M19 16h7%22 stroke=%22white%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%223.5%22 fill=%22none%22 stroke=%22white%22 stroke-width=%223%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div id="header" data-links="false"></div>
+<div class="auth-wrap">
+  <div class="card auth-card" id="view"></div>
+</div>
+<script src="assets/js/common.js"></script>
+<script>
+TC.mountChrome();
+const view = document.getElementById('view');
+let pending = null;
+
+function stepLogin() {
+  const s = TC.state();
+  if (s && s.company) { location.href = 'console.html'; return; }
+  if (s && !s.consents) { pending = s.user; return stepTerms(); }
+  if (s && !s.company) return stepCompany();
+  view.innerHTML = `
+    <h2 style="font-size:22px">TalkConnector 시작하기</h2>
+    <p class="muted">가입과 로그인을 한 번에 진행합니다. 테스트 채널 1개월 무료</p>
+    <button class="social" data-p="google"><span class="ic" style="background:#fff;border:1px solid #ddd;color:#4285f4">G</span>Google로 계속하기</button>
+    <button class="social" data-p="kakao" style="background:#fee500;color:#191919;border-color:#fee500"><span class="ic" style="background:#191919;color:#fee500">K</span>카카오로 계속하기</button>
+    <p class="muted small" style="margin-top:16px">프로토타입에서는 실제 소셜 로그인 대신 이름과 이메일을 직접 입력합니다.</p>`;
+  TC.$$('.social', view).forEach(b => b.addEventListener('click', () => stepIdentity(b.dataset.p)));
+}
+
+function stepIdentity(provider) {
+  const label = provider === 'google' ? 'Google' : '카카오';
+  view.innerHTML = `
+    <h2 style="font-size:20px">${label} 계정 정보 (모의)</h2>
+    <p class="muted small">실제 서비스에서는 ${label} 로그인 후 아래 값을 자동으로 받아옵니다.</p>
+    <form id="f">
+      <label class="field"><span>이름</span><input type="text" name="name" required value="홍길동"></label>
+      <label class="field"><span>이메일</span><input type="email" name="email" required value="dev@example.com"></label>
+      <button class="btn primary block lg">다음</button>
+    </form>
+    <button class="btn block" style="margin-top:8px" id="back">뒤로</button>`;
+  TC.$('#back').onclick = stepLogin;
+  TC.$('#f').onsubmit = e => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    pending = { provider, name: fd.get('name').trim(), email: fd.get('email').trim() };
+    stepTerms();
+  };
+}
+
+function stepTerms() {
+  view.innerHTML = `
+    <h2 style="font-size:20px">약관 동의</h2>
+    <p class="muted small">약관 동의로 별도 계약서를 대신합니다.</p>
+    <label class="check" style="border-bottom:1px solid var(--line)"><input type="checkbox" id="all"><b>전체 동의</b></label>
+    <label class="check"><input type="checkbox" class="req" name="terms"><span>[필수] <a href="terms.html" target="_blank">서비스 이용약관</a> 동의 <span class="muted small">(재판매 시 공급가 이하 판매 금지 조항 포함)</span></span></label>
+    <label class="check"><input type="checkbox" class="req" name="privacy"><span>[필수] <a href="privacy.html" target="_blank">개인정보 수집·이용</a> 동의</span></label>
+    <label class="check"><input type="checkbox" class="req" name="consign"><span>[필수] 상담 메시지 처리 위탁 동의 <span class="muted small">(카카오 발신프로필 위탁사 등록)</span></span></label>
+    <label class="check"><input type="checkbox" name="marketing"><span>[선택] 서비스 소식·혜택 수신</span></label>
+    <button class="btn primary block lg" id="next" disabled style="margin-top:12px">동의하고 계속</button>`;
+  const boxes = TC.$$('input[type=checkbox]:not(#all)', view);
+  const sync = () => { TC.$('#next').disabled = !TC.$$('.req', view).every(b => b.checked); };
+  TC.$('#all').onchange = e => { boxes.forEach(b => b.checked = e.target.checked); sync(); };
+  boxes.forEach(b => b.onchange = sync);
+  TC.$('#next').onclick = () => {
+    let s = TC.state();
+    if (!s) s = TC.createAccount(pending);
+    TC.update(st => {
+      st.consents = { at: Date.now(), terms: true, privacy: true, consign: true, marketing: TC.$('[name=marketing]', view).checked, version: '2026-11-draft' };
+      TC.audit(st, '약관 동의', `마케팅 수신 ${st.consents.marketing ? '동의' : '미동의'}`);
+    });
+    stepCompany();
+  };
+}
+
+function stepCompany() {
+  view.innerHTML = `
+    <h2 style="font-size:20px">사업자 정보</h2>
+    <p class="muted small">무료 테스트는 사업자번호 기준으로 1회 제공됩니다. 세금계산서와 영수증에도 사용합니다.</p>
+    <form id="f">
+      <label class="field"><span>회사명</span><input type="text" name="name" required placeholder="(주)예시컴퍼니"></label>
+      <label class="field"><span>사업자등록번호</span><input type="text" name="bizNo" required placeholder="123-45-67890" pattern="\\d{3}-?\\d{2}-?\\d{5}" inputmode="numeric"></label>
+      <label class="field"><span>담당자 휴대폰</span><input type="tel" name="phone" required placeholder="010-1234-5678"></label>
+      <label class="field"><span>이용 목적</span>
+        <select name="purpose">
+          <option>자사 상담 시스템 연동</option>
+          <option>자사 서비스(앱·웹) 연동</option>
+          <option>솔루션 재판매</option>
+          <option>기타</option>
+        </select></label>
+      <button class="btn primary block lg">콘솔로 이동</button>
+    </form>`;
+  TC.$('#f').onsubmit = e => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const bizNo = fd.get('bizNo').replace(/\D/g, '');
+    TC.update(s => {
+      s.company = { name: fd.get('name').trim(), bizNo: `${bizNo.slice(0, 3)}-${bizNo.slice(3, 5)}-${bizNo.slice(5)}`, phone: fd.get('phone').trim(), purpose: fd.get('purpose') };
+      s.trial = { startedAt: Date.now(), endsAt: Date.now() + TC.TRIAL_DAYS * 864e5 };
+      TC.audit(s, '사업자 정보 등록', s.company.bizNo);
+    });
+    location.href = 'console.html#/channels/new';
+  };
+}
+
+stepLogin();
+</script>
+</body>
+</html>

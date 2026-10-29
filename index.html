@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TalkConnector</title>
+<meta name="description" content="카카오 상담톡 API를 가입 당일 바로 연동하는 셀프서비스">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%232f5bea%22/%3E%3Cpath d=%22M6 16h7M19 16h7%22 stroke=%22white%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%223.5%22 fill=%22none%22 stroke=%22white%22 stroke-width=%223%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div id="header"></div>
+
+<section class="hero container">
+  <span class="eyebrow">카카오 상담톡 API 셀프서비스</span>
+  <h1>상담톡 API 연동,<br>계약서 없이 오늘 시작하세요</h1>
+  <p class="lead">구글이나 카카오 계정으로 가입하고, 채널을 인증하면 API 키와 웹훅이 바로 준비됩니다. 테스트 채널은 1개월 무료입니다.</p>
+  <div class="row" style="justify-content:center">
+    <a class="btn lg primary" href="login.html">무료로 시작하기</a>
+    <a class="btn lg" href="docs.html">API 문서 보기</a>
+  </div>
+  <p class="muted small" style="margin-top:14px">카드 등록 없이 시작 · 약정 없음 · 부가세 별도</p>
+</section>
+
+<section class="section container" id="how">
+  <h2>3단계면 연동이 끝납니다</h2>
+  <p class="sub">가입부터 첫 테스트 웹훅 수신까지 3분이면 충분합니다</p>
+  <div class="steps">
+    <div class="card step">
+      <div class="num">STEP 1</div>
+      <h3>셀프 가입</h3>
+      <p class="muted">구글·카카오 로그인, 약관 동의로 계약을 대신합니다. 서류와 등기 교환이 없습니다.</p>
+    </div>
+    <div class="card step">
+      <div class="num">STEP 2</div>
+      <h3>채널 연동</h3>
+      <p class="muted">카카오톡 채널 검색용 아이디와 관리자 휴대폰 인증으로 채널을 연결하고 API 키를 발급받습니다. 테스트 웹훅으로 수신을 바로 확인합니다.</p>
+    </div>
+    <div class="card step">
+      <div class="num">STEP 3</div>
+      <h3>요금제·결제</h3>
+      <p class="muted">운영 채널 전환 시 요금제를 고르고 카드를 등록합니다. 사용량 80%와 소진 시점에 알림을 보냅니다.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section container">
+  <h2>2주 걸리던 일을 당일에</h2>
+  <p class="sub">담당자 응대 중심의 기존 도입 절차를 셀프서비스로 바꿨습니다</p>
+  <div class="compare">
+    <div class="card before">
+      <div class="muted small">기존 도입 방식</div>
+      <div class="big-stat">평균 2주</div>
+      <ol class="muted">
+        <li>담당자 문의 (메일·전화)</li>
+        <li>견적 협의, 계약서·서류 교환</li>
+        <li>채널 수작업 연결, PDF 가이드 전달</li>
+        <li>엔지니어 연동 지원</li>
+        <li>매월 세금계산서·입금 확인</li>
+      </ol>
+    </div>
+    <div class="card">
+      <div class="small" style="color:var(--primary);font-weight:600">TalkConnector</div>
+      <div class="big-stat">당일 개통</div>
+      <ol>
+        <li>구글·카카오 로그인, 약관 동의</li>
+        <li>채널 인증, API 키·웹훅 서명 키 자동 발급</li>
+        <li>테스트 웹훅으로 수신 확인</li>
+        <li>웹 API 문서와 예제 코드</li>
+        <li>카드 자동결제, 사용량 알림</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="section container">
+  <h2>개발자를 위해 만들었습니다</h2>
+  <p class="sub">카카오 상담톡 API를 그대로 노출하지 않고, 쓰기 쉬운 REST API와 서명된 웹훅으로 감쌌습니다</p>
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>하나의 발송 API</h3>
+      <p class="muted">텍스트, 이미지, 파일, 리치 말풍선을 <code>POST /v1/messages</code> 하나로 보냅니다. 메시지 일련번호는 서버가 채웁니다.</p>
+<pre>curl -X POST https://api.talkconnector.example/v1/messages \
+  -H "Authorization: Bearer tc_test_..." \
+  -H "Content-Type: application/json" \
+  -d '{"channelId":"ch_xxx","userKey":"aBc123",
+       "type":"text","text":"안녕하세요"}'</pre>
+    </div>
+    <div class="card">
+      <h3>서명된 웹훅</h3>
+      <p class="muted">고객 메시지, 상담 시작·종료, 읽음, 개인정보 동의 결과를 고객사별 서명 키로 서명해 전달합니다. 실패 시 자동 재시도합니다.</p>
+<pre>POST https://your-server.com/webhook
+X-TC-Event: message
+X-TC-Signature: t=1793232000,v1=5f2b...
+{"id":"evt_...","type":"message",
+ "channelId":"ch_xxx","userKey":"aBc123",
+ "data":{"kind":"text","text":"문의드려요"}}</pre>
+    </div>
+    <div class="card">
+      <h3>테스트 환경 제공</h3>
+      <p class="muted">테스트 채널은 과금되지 않는 별도 환경에서 동작합니다. <code>tc_test_</code> 키로 개발하고 운영 전환 시 <code>tc_live_</code> 키만 바꾸면 됩니다.</p>
+    </div>
+    <div class="card">
+      <h3>운영에 필요한 보안</h3>
+      <p class="muted">키 마스킹, 재발급 시 기존 키 즉시 폐기, 키별 권한 범위, 호출량 제한, 관리자 접근 이력을 기본 제공합니다.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section container" id="pricing">
+  <h2>상담한 만큼만 내는 요금제</h2>
+  <p class="sub">가입비와 기본료가 없습니다. 상담방 1건은 상담 세션 1개를 의미합니다. 부가세 별도</p>
+  <div class="plans" id="plans"></div>
+  <div class="grid grid-2" style="margin-top:12px">
+    <div class="card">
+      <h3>Free 테스트</h3>
+      <p class="muted" style="margin:0">가입 즉시 테스트 채널 1개를 1개월 무료로 사용합니다. 무료 이력은 사업자 기준으로 1회만 적용됩니다.</p>
+    </div>
+    <div class="card">
+      <h3>Enterprise</h3>
+      <p class="muted">월 1,000건 초과, 후불 결제와 세금계산서 발행, 전용 서버, 전담 기술 지원이 필요한 기업을 위한 맞춤 요금입니다.</p>
+      <a class="btn sm" href="mailto:sales@talkconnector.example">도입 문의</a>
+    </div>
+  </div>
+</section>
+
+<section class="section container" id="faq">
+  <h2>자주 묻는 질문</h2>
+  <div class="grid grid-2" style="margin-top:28px">
+    <div class="card"><h3>카카오와 직접 계약해야 하나요?</h3><p class="muted" style="margin:0">아닙니다. TalkConnector가 카카오 공식 딜러로서 허브파트너 역할을 맡습니다. 고객사는 약관 동의만으로 이용합니다.</p></div>
+    <div class="card"><h3>요금은 어떻게 집계되나요?</h3><p class="muted" style="margin:0">카카오 통계 기준 상담방(세션) 수로 매일 04시에 집계합니다. 상담원이 메시지를 보낸 세션만 과금되며 시스템 메시지는 제외됩니다.</p></div>
+    <div class="card"><h3>사용량을 다 쓰면 어떻게 되나요?</h3><p class="muted" style="margin:0">80% 도달과 소진 시점에 메일로 알립니다. 소진되면 상위 요금제로 변경하기 전까지 발송이 중단됩니다. Enterprise는 중단 없이 후불 정산합니다.</p></div>
+    <div class="card"><h3>재판매할 수 있나요?</h3><p class="muted" style="margin:0">가능합니다. 다만 약관에 따라 공급가 이하로 판매할 수 없습니다. 재판매 파트너는 도입 문의로 연락 주세요.</p></div>
+    <div class="card"><h3>채널을 연결하면 1:1 채팅은 어떻게 되나요?</h3><p class="muted" style="margin:0">상담톡을 활성화하면 카카오비즈니스 파트너센터의 1:1 채팅 메뉴는 사용할 수 없고, 모든 상담은 API로 처리됩니다.</p></div>
+    <div class="card"><h3>상담 내역은 어디에 저장되나요?</h3><p class="muted" style="margin:0">카카오는 상담 메시지를 3일만 보관합니다. 웹훅으로 받은 메시지는 고객사 시스템에 저장해 주세요.</p></div>
+  </div>
+</section>
+
+<div id="footer"></div>
+<script src="assets/js/common.js"></script>
+<script>
+TC.mountChrome();
+document.getElementById('plans').innerHTML = TC.PLANS.map(p => `
+  <div class="card plan ${p.featured ? 'featured' : ''}">
+    <div class="row"><h3 style="margin:0">${p.name}</h3>${p.featured ? '<span class="badge primary">추천</span>' : ''}</div>
+    <div class="price">${TC.num(p.price / 10000)}만원<small> / 월</small></div>
+    <ul>
+      <li>상담방 ${TC.num(p.quota)}건</li>
+      <li>건당 ${p.unit}원</li>
+      <li>API · 웹훅 연동</li>
+      <li>사용량 알림</li>
+    </ul>
+    <a class="btn ${p.featured ? 'primary' : ''} block" href="login.html">시작하기</a>
+  </div>`).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TalkConnector 개인정보 처리방침</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%232f5bea%22/%3E%3Cpath d=%22M6 16h7M19 16h7%22 stroke=%22white%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%223.5%22 fill=%22none%22 stroke=%22white%22 stroke-width=%223%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div id="header"></div>
+<main class="container doc" style="max-width:800px;padding-top:40px;padding-bottom:40px">
+<div class="notice warn">초안입니다. 법무 검토 전 문안이며 정식 오픈 전 확정됩니다.</div>
+<h1>개인정보 처리방침</h1>
+<p class="muted">시행일 미정 · 버전 2026-11-draft</p>
+<h2>1. 수집 항목과 목적</h2>
+<div class="table-wrap"><table>
+<tr><th>구분</th><th>항목</th><th>목적</th><th>보유 기간</th></tr>
+<tr><td>가입</td><td>이름, 이메일, 소셜 로그인 식별자(구글·카카오)</td><td>본인 확인, 계정 관리, 공지</td><td>탈퇴 시까지</td></tr>
+<tr><td>사업자</td><td>회사명, 사업자등록번호, 담당자 휴대폰</td><td>무료 이력 관리, 요금 청구, 세금계산서</td><td>관계 법령에 따라 5년</td></tr>
+<tr><td>채널 인증</td><td>카카오톡 채널 검색용 아이디, 채널 관리자 휴대폰</td><td>발신프로필 등록</td><td>채널 연결 해지 시까지</td></tr>
+<tr><td>결제</td><td>카드사, 카드번호 뒤 4자리, PG 빌링키</td><td>자동결제</td><td>관계 법령에 따라 5년</td></tr>
+<tr><td>접속</td><td>접속 IP, 접속 시각, 콘솔 작업 이력</td><td>보안, 부정 이용 방지</td><td>1년</td></tr>
+</table></div>
+<h2>2. 상담 메시지와 고객 개인정보</h2>
+<ul>
+<li>회사는 이용자와 카카오톡 사용자 간 상담 메시지를 전달만 하며, 재시도 기간(최대 3일)이 지나면 폐기합니다.</li>
+<li>개인정보 제공 동의 결과와 카카오톡 인증 결과는 저장하지 않고 이용자 웹훅으로 전달 후 즉시 폐기합니다.</li>
+<li>이 정보의 보관과 파기 책임은 이용자에게 있습니다.</li>
+</ul>
+<h2>3. 처리 위탁</h2>
+<div class="table-wrap"><table>
+<tr><th>수탁자</th><th>업무</th></tr>
+<tr><td>카카오</td><td>상담톡 메시지 송수신</td></tr>
+<tr><td>PG사 (선정 중)</td><td>카드 결제</td></tr>
+<tr><td>클라우드 사업자 (확정 전)</td><td>서비스 인프라 운영</td></tr>
+</table></div>
+<h2>4. 이용자의 권리</h2>
+<p>이용자는 콘솔 설정 메뉴에서 정보를 조회·수정할 수 있고, 고객센터를 통해 열람, 정정, 삭제, 처리 정지를 요청할 수 있습니다.</p>
+<h2>5. 안전성 확보 조치</h2>
+<ul>
+<li>API 키는 해시로만 저장하고 화면에는 마스킹해 표시합니다.</li>
+<li>고객사별 웹훅 서명 키를 발급하고, 키 조회·재발급 이력을 기록합니다.</li>
+<li>관리자 접근은 OTP로 인증하고 모든 조회·조치를 기록합니다.</li>
+</ul>
+<h2>6. 개인정보 보호책임자</h2>
+<p>정식 오픈 전 지정 예정. 문의: privacy@talkconnector.example</p>
+</main>
+<div id="footer"></div>
+<script src="assets/js/common.js"></script>
+<script>TC.mountChrome();</script>
+</body>
+</html>
