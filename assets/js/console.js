@@ -8,20 +8,23 @@ const S = () => TC.state();
 if (!S() || !S().company) location.replace('login.html');
 
 const CATEGORIES = ['쇼핑·커머스', '금융·보험', '교육', '여행·숙박', '의료·건강', '공공·기관', 'IT·서비스', '기타'];
-const EVENTS = [
-  { id: 'message', label: '고객 메시지', src: '/message' },
-  { id: 'session.started', label: '상담 연결 (메타 정보)', src: '/reference' },
-  { id: 'session.ended', label: '상담 세션 종료', src: '/expired_session' },
-  { id: 'message.read', label: '고객 읽음', src: '/seen_info' },
-  { id: 'personal_info', label: '개인정보 제공 동의 결과', src: '/personal_info' },
-  { id: 'cert_result', label: '카카오톡 인증 결과', src: '/cert_result' },
+// Paths the customer server implements under its receive domain (v3 gateway forwards them as-is).
+const PATHS = [
+  { path: '/message', label: '고객 메시지', need: '필수' },
+  { path: '/reference', label: '상담 시작 (메타 정보)', need: '필수' },
+  { path: '/expired_session', label: '상담 세션 종료', need: '필수' },
+  { path: '/personal_info', label: '개인정보 제공 동의 결과', need: '선택' },
+  { path: '/cert_result', label: '카카오톡 인증 결과', need: '선택' },
+  { path: '/seen_info', label: '고객 읽음 정보 (별도 신청)', need: '선택' },
 ];
-const SCOPES = {
-  read: { label: '조회', desc: '세션·채널·사용량 조회' },
-  write: { label: '발송', desc: '조회 + 메시지 발송·삭제, 상담 종료, 읽음·차단, 업로드' },
-  admin: { label: '관리', desc: '발송 + 채널 설정(상담시간, 시스템 메시지)' },
-};
-const RATE = { test: '초당 10건', live: '초당 50건' };
+const SYSTEM_MESSAGES = [
+  { id: 'ST', name: '상담 시작', text: '1:1채팅을 요청하셨습니다. 채팅 내용은 상담 품질 관리를 위해 #{위탁사명}에 저장됩니다. 상담을 시작하려면 메시지를 입력해주세요. 채팅을 원치 않으시면 "!종료"를 입력해주세요.' },
+  { id: 'S1', name: '상담 불가', text: '상담원 연결이 지연되고 있습니다. 잠시 후 다시 이용해 주세요.' },
+  { id: 'S2', name: '상담 부재', text: '지금은 상담 가능 시간이 아닙니다.' },
+  { id: 'S3', name: '무응답 종료', text: '일정 시간 동안 고객님의 응답이 없어 채팅을 종료합니다.' },
+  { id: 'S4', name: '상담 대기', text: '상담원 연결 대기 중입니다. 잠시만 기다려 주세요.' },
+  { id: 'ED', name: '상담 종료', text: '고객의 요청에 의해 채팅이 종료되었습니다. 다시 대화를 시작하려면 메시지를 입력해주세요.' },
+];
 
 const head = (title, desc = '', actions = '') => `
   <div class="page-head"><div><h1>${title}</h1>${desc ? `<p>${desc}</p>` : ''}</div><span class="spacer"></span>${actions}</div>`;
@@ -53,9 +56,9 @@ function viewDashboard() {
   const checklist = [
     { done: true, label: '가입·약관 동의', href: '#/settings' },
     { done: hasChannel, label: '채널 연결', href: '#/channels/new' },
-    { done: hasKey, label: 'API 키 발급', href: '#/keys' },
-    { done: hasUrl, label: '웹훅 URL 등록', href: '#/webhook' },
-    { done: testOk, label: '테스트 웹훅 수신 확인', href: '#/webhook' },
+    { done: hasKey, label: 'API 토큰 발급', href: '#/keys' },
+    { done: hasUrl, label: '수신 도메인 등록', href: '#/webhook' },
+    { done: testOk, label: '테스트 수신 확인', href: '#/webhook' },
     { done: hasPlan, label: '요금제 선택 (운영 전환 시)', href: '#/billing' },
   ];
   const doneCount = checklist.filter(c => c.done).length;
@@ -68,7 +71,7 @@ function viewDashboard() {
     ${q && q.level ? `<div class="notice ${q.level}">이번 달 사용량이 ${q.pct}%에 도달했습니다. ${q.level === 'err' ? '운영 채널 발송이 중단되었습니다.' : ''} <a href="#/billing">요금제 변경</a></div>` : ''}
     <div class="grid grid-4" style="margin-bottom:16px">
       <div class="card stat"><div class="label">연결된 채널</div><div class="value">${activeChannels(s).length}</div><div class="small muted">테스트 ${activeChannels(s).filter(c => c.env === 'test').length} · 운영 ${liveChannels(s).length}</div></div>
-      <div class="card stat"><div class="label">활성 API 키</div><div class="value">${s.keys.filter(k => !k.revokedAt).length}</div></div>
+      <div class="card stat"><div class="label">활성 API 토큰</div><div class="value">${s.keys.filter(k => !k.revokedAt).length}</div></div>
       <div class="card stat"><div class="label">이번 달 상담방</div><div class="value">${TC.num(cycleUsage(s))}</div>
         ${q ? `<div class="meter ${q.level}"><div style="width:${q.pct}%"></div></div><div class="small muted">${q.plan.name} ${TC.num(q.plan.quota)}건 중 ${q.pct}%</div>` : '<div class="small muted">운영 채널 기준</div>'}</div>
       <div class="card stat"><div class="label">요금제</div><div class="value" style="font-size:20px">${q ? q.plan.name : 'Free 테스트'}</div><div class="small muted">${q ? TC.won(q.plan.price) + ' / 월' : '카드 등록 없음'}</div></div>
@@ -83,10 +86,11 @@ function viewDashboard() {
           ${c.done ? '' : `<a class="btn sm" href="${c.href}">진행</a>`}</div>`).join('')}
       </div>
       <div class="card">
-        <h3>최근 웹훅 전송</h3>
+        <h3>최근 테스트 수신</h3>
         ${s.deliveries.length ? `<div class="table-wrap" style="box-shadow:none"><table>
-          ${s.deliveries.slice(0, 6).map(d => `<tr><td class="mono small">${d.event}</td><td>${statusBadge(d)}</td><td class="muted small">${TC.fmtDate(d.at)}</td></tr>`).join('')}
-        </table></div>` : `<p class="muted">아직 전송 이력이 없습니다.</p><a class="btn sm" href="#/webhook">테스트 이벤트 보내기</a>`}
+          <tr><th>경로</th><th class="c">결과</th><th class="c">시각</th></tr>
+          ${s.deliveries.slice(0, 6).map(d => `<tr><td class="mono small">${d.event}</td><td class="c">${statusBadge(d)}</td><td class="c small nw">${TC.fmtDate(d.at)}</td></tr>`).join('')}
+        </table></div>` : `<p class="muted">아직 전송 이력이 없습니다.</p><a class="btn sm" href="#/webhook">테스트 요청 보내기</a>`}
       </div>
     </div>`;
 }
@@ -98,14 +102,14 @@ function viewChannels() {
   const s = S();
   page.innerHTML = head('채널', '카카오톡 채널을 발신프로필로 등록하고 상담톡을 활성화합니다', '<a class="btn primary" href="#/channels/new">채널 연결</a>') +
     (s.channels.length ? `<div class="table-wrap"><table>
-      <tr><th>채널</th><th>채널 ID</th><th>환경</th><th>상태</th><th>연결일</th><th></th></tr>
+      <tr><th>채널</th><th>발신프로필 키</th><th class="c">환경</th><th class="c">상태</th><th class="c">연결일</th><th class="c">관리</th></tr>
       ${s.channels.map(c => `<tr>
         <td><b>${TC.esc(c.name)}</b><div class="muted small">${TC.esc(c.searchId)}</div></td>
-        <td class="mono small">${c.id}</td>
-        <td>${envBadge(c.env)}</td>
-        <td>${c.status === 'active' ? '<span class="badge ok">상담톡 이용중</span>' : '<span class="badge">이용 중지</span>'}</td>
-        <td class="small muted">${TC.fmtDate(c.createdAt, false)}</td>
-        <td><a class="btn sm" href="#/channels/${c.id}">관리</a></td></tr>`).join('')}
+        <td class="mono small">${TC.mask(c.senderKey)}</td>
+        <td class="c">${envBadge(c.env)}</td>
+        <td class="c">${c.status === 'active' ? '<span class="badge ok">상담톡 이용중</span>' : '<span class="badge">이용 중지</span>'}</td>
+        <td class="c small nw">${TC.fmtDate(c.createdAt, false)}</td>
+        <td class="c"><a class="btn sm" href="#/channels/${c.id}">관리</a></td></tr>`).join('')}
     </table></div>` : `<div class="card" style="text-align:center;padding:48px 20px">
       <h3>연결된 채널이 없습니다</h3><p class="muted">테스트 채널은 무료 기간 동안 과금 없이 사용할 수 있습니다.</p>
       <a class="btn primary" href="#/channels/new">첫 채널 연결하기</a></div>`);
@@ -166,8 +170,8 @@ function viewChannelNew() {
         <div class="notice warn">상담톡을 활성화하면 다음이 적용됩니다.
           <ul style="margin:6px 0 0;padding-left:18px">
             <li>카카오비즈니스 파트너센터의 1:1 채팅 메뉴를 사용할 수 없고 모든 상담은 API로 처리됩니다.</li>
-            <li>상담 메시지는 카카오에 3일만 보관되므로 웹훅으로 받은 내용을 직접 저장해야 합니다.</li>
-            <li>웹훅 수신 준비 전 활성화하면 고객 메시지가 유실될 수 있습니다.</li>
+            <li>상담 메시지는 카카오에 3일만 보관되므로 수신 도메인으로 받은 내용을 직접 저장해야 합니다.</li>
+            <li>수신 서버 준비 전 활성화하면 고객 메시지가 유실될 수 있습니다.</li>
           </ul></div>
         <label class="check"><input type="checkbox" id="agree"><span>위 내용을 확인했으며 상담톡 이용을 시작합니다.</span></label>
         <div class="row"><button class="btn" id="back">이전</button><span class="spacer"></span><button class="btn primary" id="go" disabled>상담톡 활성화</button></div>`;
@@ -177,17 +181,17 @@ function viewChannelNew() {
         let issuedKey = null;
         TC.update(st => {
           const ch = {
-            id: TC.newChannelId(), name: w.searchId.slice(1), searchId: w.searchId, env: w.env, category: w.category,
-            status: 'active', createdAt: Date.now(),
-            consultHours: { weekdays: '09:00-18:00', weekend: false, holiday: false },
+            id: TC.newChannelId(), senderKey: TC.newSenderKey(), name: w.searchId.slice(1), searchId: w.searchId, env: w.env, category: w.category,
+            status: 'active', createdAt: Date.now(), sysMsg: { status: 'default', texts: {} },
             usage: w.env === 'live' ? TC.seedUsage(new Date().getDate(), 6) : TC.seedUsage(new Date().getDate(), 1),
           };
           st.channels.push(ch);
-          TC.audit(st, '채널 연결', `${ch.searchId} (${ch.env}) ${ch.id}`);
+          TC.audit(st, '채널 연결', `${ch.searchId} (${ch.env}) ${TC.mask(ch.senderKey)}`);
           if (!st.keys.some(k => k.env === w.env && !k.revokedAt)) {
-            issuedKey = issueKey(st, w.env, `${w.env === 'live' ? '운영' : '테스트'} 기본 키`, 'write');
+            issuedKey = issueKey(st, w.env, `${w.env === 'live' ? '운영' : '테스트'} 기본 토큰`);
           }
           w.channelId = ch.id;
+          w.senderKey = ch.senderKey;
         });
         w.issuedKey = issuedKey;
         w.step = 4; render();
@@ -196,17 +200,19 @@ function viewChannelNew() {
       const st = S();
       wz.innerHTML = `
         <div class="notice ok">${TC.esc(w.searchId)} 채널이 연결되었습니다.</div>
-        <label class="field"><span>채널 ID</span>${secretBox(w.channelId)}</label>
-        ${w.issuedKey ? `<label class="field"><span>API 키 (지금만 전체 표시됩니다)</span>${secretBox(w.issuedKey)}</label>
-          <div class="notice warn small">이 키는 다시 볼 수 없습니다. 안전한 곳에 저장해 주세요. 분실 시 재발급하면 기존 키는 즉시 폐기됩니다.</div>`
-          : `<p class="muted small">기존 ${w.env === 'live' ? '운영' : '테스트'} API 키를 그대로 사용합니다. <a href="#/keys">API 키 관리</a></p>`}
-        <label class="field"><span>웹훅 서명 키</span>${secretBox(TC.mask(st.webhook.secret))}</label>
-        <h3 style="margin-top:20px">다음 단계</h3>
-        <pre>curl -X POST ${TC.API_BASE}/v1/messages \\
-  -H "Authorization: Bearer ${w.issuedKey || (st.keys.find(k => k.env === w.env && !k.revokedAt)?.masked || '')}" \\
+        <label class="field"><span>발신프로필 키 (X-SenderKey)</span>${secretBox(w.senderKey)}</label>
+        ${w.issuedKey ? `<label class="field"><span>API 토큰 (X-JwtToken, 지금만 전체 표시됩니다)</span>${secretBox(w.issuedKey)}</label>
+          <div class="notice warn small">이 토큰은 다시 볼 수 없습니다. 안전한 곳에 저장해 주세요. 분실 시 재발급하면 기존 토큰은 즉시 폐기됩니다.</div>`
+          : `<p class="muted small">기존 ${w.env === 'live' ? '운영' : '테스트'} API 토큰을 그대로 사용합니다. <a href="#/keys">API 토큰 관리</a></p>`}
+        <label class="field"><span>Channel Secret (수신 서명 검증용)</span>${secretBox(TC.mask(st.webhook.secret))}</label>
+        <h3 style="margin-top:20px">첫 메시지 보내기</h3>
+        <pre>curl -X POST ${TC.API_BASE}/v3/chat/send/plain \\
   -H "Content-Type: application/json" \\
-  -d '{"channelId":"${w.channelId}","userKey":"{userKey}","type":"text","text":"안녕하세요"}'</pre>
-        <div class="row"><a class="btn" href="#/channels/${w.channelId}">채널 관리</a><span class="spacer"></span><a class="btn primary" href="#/webhook">웹훅 설정하고 테스트하기</a></div>`;
+  -H "X-SenderKey: ${w.senderKey}" \\
+  -H "X-JwtToken: ${w.issuedKey || (st.keys.find(k => k.env === w.env && !k.revokedAt)?.masked || '')}" \\
+  -d '{"user_key":"{user_key}","sender_key":"${w.senderKey}",
+       "serial_number":"test_00001","chat_bubble_type":"TEXT","message":"안녕하세요"}'</pre>
+        <div class="row"><a class="btn" href="#/channels/${w.channelId}">채널 관리</a><span class="spacer"></span><a class="btn primary" href="#/webhook">수신 도메인 등록하고 테스트하기</a></div>`;
       bindCopy(wz);
     }
   };
@@ -220,35 +226,38 @@ function viewChannelDetail(id) {
   const s = S();
   const c = s.channels.find(x => x.id === id);
   if (!c) { page.innerHTML = head('채널을 찾을 수 없습니다') + '<a href="#/channels">목록으로</a>'; return; }
-  const ch = c.consultHours;
   const rooms = (c.usage || []).reduce((a, d) => a + d.rooms, 0);
-  page.innerHTML = head(TC.esc(c.name), `${TC.esc(c.searchId)} · ${c.id}`, `<a class="btn" href="#/channels">목록</a>`) + `
+  const sm = c.sysMsg || { status: 'default', texts: {} };
+  const smBadge = { default: '<span class="badge">기본 문구</span>', review: '<span class="badge warn">검수 중</span>', approved: '<span class="badge ok">승인</span>' }[sm.status];
+  page.innerHTML = head(TC.esc(c.name), `${TC.esc(c.searchId)}`, `<a class="btn" href="#/channels">목록</a>`) + `
     <div class="grid grid-2">
       <div class="card">
         <h3>채널 정보</h3>
         <dl class="kv">
-          <dt>채널 ID</dt><dd class="mono small">${c.id} <button class="btn sm" data-copy="${c.id}">복사</button></dd>
+          <dt>발신프로필 키</dt><dd class="mono small" style="word-break:break-all">${c.senderKey} <button class="btn sm" data-copy="${c.senderKey}">복사</button></dd>
           <dt>환경</dt><dd>${envBadge(c.env)}</dd>
           <dt>상태</dt><dd>${c.status === 'active' ? '<span class="badge ok">상담톡 이용중</span>' : '<span class="badge">이용 중지</span>'}</dd>
           <dt>카테고리</dt><dd>${TC.esc(c.category)}</dd>
           <dt>연결일</dt><dd>${TC.fmtDate(c.createdAt)}</dd>
-          <dt>호출 한도</dt><dd>${RATE[c.env]}</dd>
           <dt>이번 달 상담방</dt><dd>${TC.num(rooms)}건 ${c.env === 'test' ? '<span class="muted small">(과금 없음)</span>' : ''}</dd>
         </dl>
       </div>
       <div class="card">
-        <h3>상담시간</h3>
-        <p class="muted small">상담시간 외 메시지에는 카카오 시스템 메시지(상담 부재)가 자동 발송됩니다. 시스템 메시지는 과금되지 않습니다.</p>
-        <label class="field"><span>평일</span><input type="text" id="wk" value="${TC.esc(ch.weekdays)}" placeholder="09:00-18:00"></label>
-        <label class="check"><input type="checkbox" id="we" ${ch.weekend ? 'checked' : ''}><span>주말 상담</span></label>
-        <label class="check"><input type="checkbox" id="ho" ${ch.holiday ? 'checked' : ''}><span>공휴일 상담</span></label>
-        <button class="btn sm" id="saveHours">저장</button>
+        <h3>상담 시작 버튼 링크</h3>
+        <p class="muted small">홈페이지나 앱의 상담하기 버튼에 연결하면 고객이 바로 상담을 시작합니다. <code>extra</code> 값은 수신 경로 <code>/reference</code>로 전달됩니다. 영문, 숫자, 밑줄만 50자까지 쓸 수 있습니다.</p>
+        ${secretBox(`https://bizmessage.kakao.com/chat/open/${c.searchId}?extra=order_1234`)}
+        <p class="muted small" style="margin:10px 0 0">봇으로 시작하려면 <code>&amp;bot=true&amp;event=블록이벤트명</code>을 붙입니다.</p>
       </div>
     </div>
     <div class="card" style="margin-top:16px">
-      <h3>상담 연결 링크</h3>
-      <p class="muted small">웹·앱 버튼에 연결하면 고객이 바로 상담을 시작합니다. <code>extra</code> 값은 상담 연결 웹훅(session.started)으로 전달됩니다.</p>
-      ${secretBox(`https://bizmessage.kakao.com/chat/open/${c.searchId}?extra=order_1234`)}
+      <div class="row"><h3 style="margin:0">시스템 메시지</h3>${smBadge}<span class="spacer"></span><button class="btn sm primary" id="smReq" ${sm.status === 'review' ? 'disabled' : ''}>검수 요청</button></div>
+      <p class="muted small" style="margin-top:8px">카카오가 상황별로 자동 발송하는 안내 문구입니다. 6종을 한 세트로 검수 요청하며, 카카오 검수(보통 3영업일) 승인 즉시 적용됩니다. 각 200자 이내, 광고 문구 불가, URL은 고객센터 주소만 가능합니다.</p>
+      <div class="table-wrap"><table>
+        <tr><th class="c">코드</th><th>구분</th><th>문구</th></tr>
+        ${SYSTEM_MESSAGES.map(m => `<tr><td class="c mono small">${m.id}</td><td class="nw">${m.name}</td>
+          <td><textarea class="smText" data-id="${m.id}" maxlength="200" style="min-height:56px;font-family:var(--font);font-size:13px" ${sm.status === 'review' ? 'disabled' : ''}>${TC.esc(sm.texts[m.id] ?? m.text)}</textarea></td></tr>`).join('')}
+      </table></div>
+      <p class="muted small" style="margin:10px 0 0">상담 시작(ST) 문구에는 <code>#{위탁사명}</code>, 저장 안내, 종료 방법("!종료") 안내가 반드시 들어가야 합니다.</p>
     </div>
     <div class="card" style="margin-top:16px">
       <h3>채널 관리</h3>
@@ -259,13 +268,16 @@ function viewChannelDetail(id) {
       <p class="muted small" style="margin:10px 0 0">이용 중지 시 카카오 채널의 1:1 채팅 기능이 다시 활성화되고 API 발송이 차단됩니다.</p>
     </div>`;
   bindCopy(page);
-  TC.$('#saveHours').onclick = () => {
+  TC.$('#smReq').onclick = () => {
+    const texts = Object.fromEntries(TC.$$('.smText').map(t => [t.dataset.id, t.value.trim()]));
+    if (!/#\{위탁사명\}/.test(texts.ST) || !/!종료/.test(texts.ST)) return TC.toast('상담 시작 문구에 #{위탁사명}과 "!종료" 안내를 넣어 주세요');
     TC.update(st => {
       const x = st.channels.find(y => y.id === id);
-      x.consultHours = { weekdays: TC.$('#wk').value.trim(), weekend: TC.$('#we').checked, holiday: TC.$('#ho').checked };
-      TC.audit(st, '상담시간 변경', `${x.id} ${x.consultHours.weekdays}`);
+      x.sysMsg = { status: 'review', texts, requestedAt: Date.now() };
+      TC.audit(st, '시스템 메시지 검수 요청', x.searchId);
     });
-    TC.toast('상담시간을 저장했습니다');
+    TC.toast('검수를 요청했습니다. 승인되면 메일로 알려 드립니다');
+    route();
   };
   const promote = TC.$('#promote');
   if (promote) promote.onclick = async () => {
@@ -274,181 +286,186 @@ function viewChannelDetail(id) {
       if (await TC.confirm('요금제가 필요합니다', '운영 채널은 요금제 선택과 카드 등록 후 사용할 수 있습니다.', '요금제 선택')) location.hash = '#/billing';
       return;
     }
-    if (!await TC.confirm('운영 채널로 전환', '운영 허브파트너로 발신프로필을 다시 등록합니다. 전환 후 상담방이 과금되며 tc_live_ 키로 호출해야 합니다.', '전환')) return;
+    if (!await TC.confirm('운영 채널로 전환', '운영 환경에 발신프로필을 다시 등록합니다. 발신프로필 키가 새로 발급되고, 전환 후 상담방이 과금되며 운영 API 토큰으로 호출해야 합니다.', '전환')) return;
     TC.update(st2 => {
       const x = st2.channels.find(y => y.id === id);
       x.env = 'live';
+      x.senderKey = TC.newSenderKey();
       x.usage = TC.seedUsage(new Date().getDate(), 6);
-      if (!st2.keys.some(k => k.env === 'live' && !k.revokedAt)) issueKey(st2, 'live', '운영 기본 키', 'write');
-      TC.audit(st2, '운영 채널 전환', x.id);
+      if (!st2.keys.some(k => k.env === 'live' && !k.revokedAt)) issueKey(st2, 'live', '운영 기본 토큰');
+      TC.audit(st2, '운영 채널 전환', x.searchId);
     });
-    TC.toast('운영 채널로 전환했습니다. API 키 메뉴에서 운영 키를 확인하세요');
+    TC.toast('운영 채널로 전환했습니다. API 토큰 메뉴에서 운영 토큰을 확인하세요');
     route();
   };
   const deact = TC.$('#deact');
   if (deact) deact.onclick = async () => {
     if (!await TC.confirm('상담톡 이용 중지', '진행 중인 상담은 종료되고 더 이상 API로 메시지를 보낼 수 없습니다.', '이용 중지', true)) return;
-    TC.update(st => { const x = st.channels.find(y => y.id === id); x.status = 'inactive'; TC.audit(st, '상담톡 이용 중지', x.id); });
+    TC.update(st => { const x = st.channels.find(y => y.id === id); x.status = 'inactive'; TC.audit(st, '상담톡 이용 중지', x.searchId); });
     route();
   };
   const react = TC.$('#react');
   if (react) react.onclick = () => {
-    TC.update(st => { const x = st.channels.find(y => y.id === id); x.status = 'active'; TC.audit(st, '상담톡 활성화', x.id); });
+    TC.update(st => { const x = st.channels.find(y => y.id === id); x.status = 'active'; TC.audit(st, '상담톡 활성화', x.searchId); });
     route();
   };
 }
 
-// ---------- API keys ----------
-function issueKey(st, env, name, scope) {
-  const value = TC.newApiKey(env);
-  st.keys.unshift({ id: 'key_' + TC.rand(8), env, name, scope, masked: TC.mask(value), createdAt: Date.now(), lastUsedAt: null, revokedAt: null });
-  TC.audit(st, 'API 키 발급', `${name} ${TC.mask(value)}`);
+// ---------- API tokens ----------
+function issueKey(st, env, name) {
+  const value = TC.newApiToken(env);
+  st.keys.unshift({ id: 'key_' + TC.rand(8), env, name, value, masked: TC.mask(value), createdAt: Date.now(), lastUsedAt: null, revokedAt: null });
+  TC.audit(st, 'API 토큰 발급', `${name} ${TC.mask(value)}`);
   return value;
 }
 
 function viewKeys() {
   const s = S();
-  page.innerHTML = head('API 키', '키는 발급 직후 한 번만 전체 표시됩니다. 재발급하면 기존 키는 즉시 폐기됩니다', '<button class="btn primary" id="newKey">새 키 발급</button>') + `
+  page.innerHTML = head('API 토큰', '모든 요청의 X-JwtToken 헤더에 넣습니다. 발급 직후 한 번만 전체 표시되며, 재발급하면 기존 토큰은 즉시 폐기됩니다', '<button class="btn primary" id="newKey">새 토큰 발급</button>') + `
     <div class="table-wrap"><table>
-      <tr><th>이름</th><th>키</th><th>환경</th><th>권한</th><th>발급일</th><th>상태</th><th></th></tr>
+      <tr><th>이름</th><th>토큰</th><th class="c">환경</th><th class="c">발급일</th><th class="c">상태</th><th class="c">관리</th></tr>
       ${s.keys.length ? s.keys.map(k => `<tr>
         <td>${TC.esc(k.name)}</td>
         <td class="mono small">${k.masked}</td>
-        <td>${envBadge(k.env)}</td>
-        <td><span class="badge" title="${SCOPES[k.scope].desc}">${SCOPES[k.scope].label}</span></td>
-        <td class="small muted">${TC.fmtDate(k.createdAt)}</td>
-        <td>${k.revokedAt ? `<span class="badge">폐기 ${TC.fmtDate(k.revokedAt, false)}</span>` : '<span class="badge ok">사용중</span>'}</td>
-        <td>${k.revokedAt ? '' : `<div class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn sm" data-rotate="${k.id}">재발급</button><button class="btn sm danger" data-revoke="${k.id}">폐기</button></div>`}</td>
-      </tr>`).join('') : '<tr><td colspan="7" class="muted">발급된 키가 없습니다. 채널을 연결하면 기본 키가 자동 발급됩니다.</td></tr>'}
+        <td class="c">${envBadge(k.env)}</td>
+        <td class="c small nw">${TC.fmtDate(k.createdAt)}</td>
+        <td class="c">${k.revokedAt ? `<span class="badge">폐기 ${TC.fmtDate(k.revokedAt, false)}</span>` : '<span class="badge ok">사용중</span>'}</td>
+        <td class="c">${k.revokedAt ? '' : `<div class="row" style="gap:6px;flex-wrap:nowrap;justify-content:center"><button class="btn sm" data-rotate="${k.id}">재발급</button><button class="btn sm danger" data-revoke="${k.id}">폐기</button></div>`}</td>
+      </tr>`).join('') : '<tr><td colspan="6" class="muted c">발급된 토큰이 없습니다. 채널을 연결하면 기본 토큰이 자동 발급됩니다.</td></tr>'}
     </table></div>
     <div class="grid grid-3" style="margin-top:16px">
-      ${Object.entries(SCOPES).map(([, v]) => `<div class="card"><h3>${v.label} 권한</h3><p class="muted small" style="margin:0">${v.desc}</p></div>`).join('')}
+      <div class="card"><h3>발신프로필 키</h3><p class="muted small" style="margin:0"><code>X-SenderKey</code> 헤더와 본문 <code>sender_key</code>. 채널마다 다르며 <a href="#/channels">채널</a> 메뉴에서 확인합니다.</p></div>
+      <div class="card"><h3>API 토큰</h3><p class="muted small" style="margin:0"><code>X-JwtToken</code> 헤더. 계정의 모든 채널에 공통이며 테스트와 운영 토큰이 따로 있습니다.</p></div>
+      <div class="card"><h3>Channel Secret</h3><p class="muted small" style="margin:0">수신 요청의 <code>X-Signature</code> 검증용. <a href="#/webhook">수신 설정</a> 메뉴에서 확인합니다.</p></div>
     </div>
-    <p class="muted small" style="margin-top:16px">호출 한도: 테스트 키 ${RATE.test}, 운영 키 ${RATE.live}. 초과 시 <code>429 RATE_LIMITED</code>를 반환합니다. 키는 서버에 해시로만 저장됩니다.</p>`;
+    <p class="muted small" style="margin-top:16px">토큰은 서버에 해시로만 저장되며 발급·폐기 이력은 접근 이력에 남습니다. 토큰을 브라우저나 앱에 넣지 말고 서버에서만 호출하세요.</p>`;
 
   TC.$('#newKey').onclick = () => TC.modal(`
-    <h3>새 API 키 발급</h3>
-    <label class="field"><span>이름</span><input type="text" id="kName" value="새 키"></label>
-    <label class="field"><span>환경</span><select id="kEnv"><option value="test">테스트 (tc_test_)</option><option value="live" ${liveChannels(S()).length ? '' : 'disabled'}>운영 (tc_live_) ${liveChannels(S()).length ? '' : '- 운영 채널 필요'}</option></select></label>
-    <label class="field"><span>권한</span><select id="kScope">${Object.entries(SCOPES).map(([k, v]) => `<option value="${k}" ${k === 'write' ? 'selected' : ''}>${v.label}: ${v.desc}</option>`).join('')}</select></label>
+    <h3>새 API 토큰 발급</h3>
+    <label class="field"><span>이름</span><input type="text" id="kName" value="새 토큰"></label>
+    <label class="field"><span>환경</span><select id="kEnv"><option value="test">테스트</option><option value="live" ${liveChannels(S()).length ? '' : 'disabled'}>운영 ${liveChannels(S()).length ? '' : '- 운영 채널 필요'}</option></select></label>
     <div class="row" style="justify-content:flex-end"><button class="btn" data-close>취소</button><button class="btn primary" id="kGo">발급</button></div>`,
     (m, close) => {
       TC.$('#kGo', m).onclick = () => {
         let v;
-        TC.update(st => { v = issueKey(st, TC.$('#kEnv', m).value, TC.$('#kName', m).value.trim() || '새 키', TC.$('#kScope', m).value); });
+        TC.update(st => { v = issueKey(st, TC.$('#kEnv', m).value, TC.$('#kName', m).value.trim() || '새 토큰'); });
         close(); showOnce(v); viewKeys();
       };
     });
 
   TC.$$('[data-rotate]').forEach(b => b.onclick = async () => {
-    if (!await TC.confirm('키 재발급', '새 키를 발급하고 기존 키는 즉시 폐기합니다. 기존 키를 쓰는 서버는 바로 401 오류가 납니다.', '재발급', true)) return;
+    if (!await TC.confirm('토큰 재발급', '새 토큰을 발급하고 기존 토큰은 즉시 폐기합니다. 기존 토큰을 쓰는 서버는 바로 인증 실패(-500)가 납니다.', '재발급', true)) return;
     let v;
     TC.update(st => {
       const old = st.keys.find(k => k.id === b.dataset.rotate);
       old.revokedAt = Date.now();
-      TC.audit(st, 'API 키 폐기', `${old.name} ${old.masked} (재발급)`);
-      v = issueKey(st, old.env, old.name, old.scope);
+      TC.audit(st, 'API 토큰 폐기', `${old.name} ${old.masked} (재발급)`);
+      v = issueKey(st, old.env, old.name);
     });
     showOnce(v); viewKeys();
   });
   TC.$$('[data-revoke]').forEach(b => b.onclick = async () => {
-    if (!await TC.confirm('키 폐기', '폐기한 키는 복구할 수 없습니다.', '폐기', true)) return;
-    TC.update(st => { const k = st.keys.find(x => x.id === b.dataset.revoke); k.revokedAt = Date.now(); TC.audit(st, 'API 키 폐기', `${k.name} ${k.masked}`); });
+    if (!await TC.confirm('토큰 폐기', '폐기한 토큰은 복구할 수 없습니다.', '폐기', true)) return;
+    TC.update(st => { const k = st.keys.find(x => x.id === b.dataset.revoke); k.revokedAt = Date.now(); TC.audit(st, 'API 토큰 폐기', `${k.name} ${k.masked}`); });
     viewKeys();
   });
 }
 
 function showOnce(value) {
-  TC.modal(`<h3>API 키가 발급되었습니다</h3>
+  TC.modal(`<h3>API 토큰이 발급되었습니다</h3>
     <p class="muted small">이 창을 닫으면 다시 볼 수 없습니다.</p>
     ${secretBox(value)}
     <div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn primary" data-close>저장했습니다</button></div>`, m => bindCopy(m));
 }
 
-// ---------- Webhook ----------
-function samplePayload(s, type) {
+// ---------- Receive (customer domain) ----------
+function samplePayload(s, path) {
   const ch = activeChannels(s)[0];
-  const base = {
-    id: 'evt_' + TC.rand(20), type, createdAt: new Date().toISOString(), livemode: ch ? ch.env === 'live' : false, test: true,
-    channelId: ch ? ch.id : 'ch_test000000', userKey: 'tc-test-' + TC.rand(6), sessionId: String(29000 + Math.floor(Math.random() * 999)),
-  };
-  const data = {
-    'message': { serial: String(Date.now()) + TC.rand(5, '0123456789'), time: Date.now(), kind: 'text', text: '배송 언제 오나요?', attachments: [], extra: null },
-    'session.started': { extra: 'order_1234', appUserId: null, lastReference: null },
-    'session.ended': { endedAt: new Date().toISOString() },
-    'message.read': { readAt: new Date().toISOString() },
-    'personal_info': { phone: '010-0000-0000', nickname: '테스트고객', consentedAt: new Date().toISOString() },
-    'cert_result': { certTxId: 'ctx_' + TC.rand(10), encrypted: TC.rand(48), certifiedAt: new Date().toISOString() },
-  }[type];
-  return { ...base, data };
+  const base = { user_key: 'tc-test-' + TC.rand(6), sender_key: ch ? ch.senderKey : TC.newSenderKey(), session_id: 29000 + Math.floor(Math.random() * 999) };
+  const now = Date.now();
+  return {
+    '/message': { ...base, time: now, serial_number: Number(String(now) + TC.rand(5, '0123456789')), type: 'text', content: '배송 언제 오나요?', contents: ['배송 언제 오나요?'] },
+    '/reference': { ...base, app_user_id: null, time: now, reference: { extra: 'order_1234', text: 'order_1234', appUserId: null } },
+    '/expired_session': { ...base, session_id: String(base.session_id) },
+    '/personal_info': { ...base, time: now, personal_info: { phone_number: '821000000000', nickname: '테스트고객' } },
+    '/cert_result': { ...base, time: now, cert_tx_id: TC.uuid(), cert_result: TC.rand(64) },
+    '/seen_info': { ...base, time: now },
+  }[path];
 }
 
-async function deliver(payload) {
+// Token the gateway uses for X-Signature: the account API token of the channel's environment.
+const signingToken = s => {
+  const ch = activeChannels(s)[0];
+  const env = ch ? ch.env : 'test';
+  const k = s.keys.find(x => x.env === env && !x.revokedAt) || s.keys.find(x => !x.revokedAt);
+  return k ? k.value : '';
+};
+
+async function deliver(path, payload) {
   const s = S();
   const raw = JSON.stringify(payload);
-  const t = Math.floor(Date.now() / 1000);
-  const sig = `t=${t},v1=${await TC.hmacHex(s.webhook.secret, `${t}.${raw}`)}`;
-  const headers = { 'Content-Type': 'application/json', 'X-TC-Event': payload.type, 'X-TC-Delivery': payload.id, 'X-TC-Signature': sig };
-  const rec = { id: payload.id, event: payload.type, url: s.webhook.url, at: Date.now(), pending: true, headers, body: raw };
+  const url = s.webhook.url.replace(/\/+$/, '') + path;
+  const headers = { 'Content-Type': 'application/json', 'X-Signature': await TC.signature(s.webhook.secret, signingToken(s)) };
+  const rec = { id: 'd_' + TC.rand(12), event: path, url, at: Date.now(), pending: true, headers, body: raw };
   TC.update(st => { st.deliveries.unshift(rec); st.deliveries = st.deliveries.slice(0, 50); });
   const started = performance.now();
   let result;
   try {
-    const res = await fetch(s.webhook.url, { method: 'POST', headers, body: raw });
-    result = { ok: res.ok, code: String(res.status), note: res.ok ? '' : '2xx가 아니면 재시도 대상입니다' };
+    const res = await fetch(url, { method: 'POST', headers, body: raw });
+    result = { ok: res.ok, code: String(res.status), note: res.ok ? '' : '2xx가 아니면 카카오가 고객에게 응답 실패 안내를 보냅니다' };
   } catch {
     // CORS blocked: retry as a simple request so the endpoint still receives the body.
     try {
-      await fetch(s.webhook.url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: raw });
-      result = { ok: true, code: '전송됨', note: '브라우저 CORS 제한으로 서명 헤더 없이 본문만 전달했고 응답 코드는 확인할 수 없습니다. 실제 서비스는 서버에서 헤더와 함께 전송합니다.' };
+      await fetch(url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: raw });
+      result = { ok: true, code: '전송됨', note: '브라우저 CORS 제한으로 서명 헤더 없이 본문만 전달했고 응답 코드는 확인할 수 없습니다. 실제 서비스는 중계 서버가 헤더와 함께 전송합니다.' };
     } catch {
-      result = { ok: false, code: '연결 실패', note: 'URL에 연결할 수 없습니다. 주소와 HTTPS 인증서를 확인해 주세요.' };
+      result = { ok: false, code: '연결 실패', note: '주소에 연결할 수 없습니다. 도메인과 HTTPS 인증서를 확인해 주세요.' };
     }
   }
   result.ms = Math.round(performance.now() - started);
-  TC.update(st => { const d = st.deliveries.find(x => x.id === rec.id); Object.assign(d, result, { pending: false }); TC.audit(st, '테스트 웹훅 전송', `${payload.type} ${result.code}`); });
+  TC.update(st => { const d = st.deliveries.find(x => x.id === rec.id); Object.assign(d, result, { pending: false }); TC.audit(st, '테스트 수신 전송', `${path} ${result.code}`); });
   return result;
 }
 
 function viewWebhook() {
   const s = S();
   const wh = s.webhook;
-  page.innerHTML = head('웹훅', '고객 메시지와 상담 이벤트를 고객사 서버로 전달합니다') + `
+  page.innerHTML = head('수신 설정', '카카오에서 들어온 고객 메시지와 상담 이벤트를 고객사 서버로 그대로 전달합니다') + `
     <div class="card">
-      <h3>수신 URL</h3>
-      <label class="field"><span>엔드포인트 (HTTPS)</span><input type="url" id="url" placeholder="https://your-server.com/talkconnector/webhook" value="${TC.esc(wh.url)}"></label>
-      <p class="muted small">테스트용 수신 주소가 없다면 webhook.site 같은 요청 확인 도구의 주소를 넣어 보세요.</p>
-      <div class="small" style="font-weight:600;color:var(--ink-2);margin-bottom:6px">수신 이벤트</div>
-      <div class="grid grid-2" style="gap:0 16px">
-        ${EVENTS.map(e => `<label class="check" style="padding:4px 0"><input type="checkbox" class="ev" value="${e.id}" ${wh.events.includes(e.id) ? 'checked' : ''}><span><code>${e.id}</code> ${e.label}</span></label>`).join('')}
-      </div>
+      <h3>수신 도메인</h3>
+      <label class="field"><span>도메인 (HTTPS)</span><input type="url" id="url" placeholder="https://cs.your-company.com/kakao" value="${TC.esc(wh.url)}"></label>
+      <p class="muted small">아래 경로를 이 도메인 뒤에 붙여 호출합니다. 예: <code>${TC.esc((wh.url || 'https://cs.your-company.com/kakao').replace(/\/+$/, ''))}/message</code>. 테스트 서버가 없다면 webhook.site 같은 요청 확인 도구 주소를 넣어 보세요.</p>
+      <div class="table-wrap"><table>
+        <tr><th>경로</th><th>내용</th><th class="c">구분</th></tr>
+        ${PATHS.map(p => `<tr><td class="mono small">${p.path}</td><td>${p.label}</td><td class="c">${p.need === '필수' ? '<span class="badge primary">필수</span>' : '<span class="badge">선택</span>'}</td></tr>`).join('')}
+      </table></div>
       <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn primary" id="save">저장</button></div>
     </div>
     <div class="card" style="margin-top:16px">
-      <h3>서명 키</h3>
-      <p class="muted small">모든 요청의 <code>X-TC-Signature</code> 헤더를 이 키로 검증하세요. 고객사마다 다른 키가 발급됩니다. <a href="docs.html#webhook-signature">검증 방법</a></p>
+      <h3>Channel Secret</h3>
+      <p class="muted small">모든 수신 요청에는 <code>X-Signature</code> 헤더가 붙습니다. 이 값으로 서명을 검증해 중계 서버에서 온 요청인지 확인하세요. 고객사마다 다른 값이 발급됩니다. <a href="docs.html#signature">검증 방법</a></p>
       <div class="secret"><code id="sec">${TC.mask(wh.secret)}</code><button class="btn sm" id="reveal">보기</button><button class="btn sm" data-copy="${wh.secret}">복사</button><button class="btn sm danger" id="rotate">재발급</button></div>
     </div>
     <div class="card" style="margin-top:16px">
-      <h3>테스트 이벤트 보내기</h3>
-      <p class="muted small">실제와 같은 형식과 서명으로 전송합니다. 테스트 이벤트에는 <code>"test": true</code>가 붙고 <code>userKey</code>는 <code>tc-test-</code>로 시작합니다.</p>
+      <h3>테스트 요청 보내기</h3>
+      <p class="muted small">실제와 같은 형식과 서명으로 전송합니다. 테스트 요청의 <code>user_key</code>는 <code>tc-test-</code>로 시작하며 이 고객에게는 답장할 수 없습니다.</p>
       <div class="row">
-        <select id="evType" style="max-width:280px">${EVENTS.map(e => `<option value="${e.id}">${e.id}</option>`).join('')}</select>
+        <select id="evType" style="max-width:280px">${PATHS.map(p => `<option value="${p.path}">${p.path} ${p.label}</option>`).join('')}</select>
         <button class="btn primary" id="send" ${wh.url ? '' : 'disabled'}>전송</button>
-        ${wh.url ? '' : '<span class="muted small">URL을 먼저 저장하세요</span>'}
+        ${wh.url ? '' : '<span class="muted small">도메인을 먼저 저장하세요</span>'}
       </div>
       <div id="result" style="margin-top:12px"></div>
     </div>
     <h3 style="margin-top:28px">전송 이력</h3>
     <div class="table-wrap"><table>
-      <tr><th>이벤트</th><th>결과</th><th>응답 시간</th><th>시각</th><th></th></tr>
+      <tr><th>경로</th><th class="c">결과</th><th class="r">응답 시간</th><th class="c">시각</th><th class="c">관리</th></tr>
       ${s.deliveries.length ? s.deliveries.map(d => `<tr>
-        <td class="mono small">${d.event}</td><td>${statusBadge(d)}</td><td class="small">${d.ms != null ? d.ms + 'ms' : ''}</td>
-        <td class="small muted">${TC.fmtDate(d.at)}</td>
-        <td><div class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn sm" data-view="${d.id}">보기</button><button class="btn sm" data-redo="${d.id}">재전송</button></div></td></tr>`).join('')
-        : '<tr><td colspan="5" class="muted">아직 전송 이력이 없습니다.</td></tr>'}
+        <td class="mono small">${d.event}</td><td class="c">${statusBadge(d)}</td><td class="r small">${d.ms != null ? d.ms + 'ms' : ''}</td>
+        <td class="c small nw">${TC.fmtDate(d.at)}</td>
+        <td class="c"><div class="row" style="gap:6px;flex-wrap:nowrap;justify-content:center"><button class="btn sm" data-view="${d.id}">보기</button><button class="btn sm" data-redo="${d.id}">재전송</button></div></td></tr>`).join('')
+        : '<tr><td colspan="5" class="muted c">아직 전송 이력이 없습니다.</td></tr>'}
     </table></div>
-    <p class="muted small" style="margin-top:12px">재시도 정책: 5초 안에 2xx 응답이 없으면 1분, 5분, 30분, 2시간, 6시간 간격으로 최대 5회 재시도합니다.</p>`;
+    <p class="muted small" style="margin-top:12px">고객사 서버가 응답하지 않으면 카카오가 고객에게 "현재 연결이 원활하지 않습니다" 시스템 메시지를 보내고, 해당 메시지는 다시 전달되지 않습니다. 수신 서버는 바로 200으로 응답하고 처리는 비동기로 하세요.</p>`;
 
   bindCopy(page);
   TC.$('#save').onclick = () => {
@@ -456,9 +473,8 @@ function viewWebhook() {
     if (url && !/^https:\/\//.test(url)) return TC.toast('HTTPS 주소만 등록할 수 있습니다');
     TC.update(st => {
       st.webhook.url = url;
-      st.webhook.events = TC.$$('.ev').filter(x => x.checked).map(x => x.value);
       st.webhook.enabled = !!url;
-      TC.audit(st, '웹훅 설정 변경', url);
+      TC.audit(st, '수신 도메인 변경', url);
     });
     TC.toast('저장했습니다');
     viewWebhook();
@@ -468,17 +484,18 @@ function viewWebhook() {
     const shown = el.textContent === wh.secret;
     el.textContent = shown ? TC.mask(wh.secret) : wh.secret;
     e.target.textContent = shown ? '보기' : '숨기기';
-    if (!shown) TC.update(st => TC.audit(st, '서명 키 조회'));
+    if (!shown) TC.update(st => TC.audit(st, 'Channel Secret 조회'));
   };
   TC.$('#rotate').onclick = async () => {
-    if (!await TC.confirm('서명 키 재발급', '기존 키로 서명 검증하는 서버는 새 키로 바꿔야 합니다. 전환 기간 24시간 동안은 두 키로 모두 서명합니다.', '재발급', true)) return;
-    TC.update(st => { st.webhook.secret = TC.newSecret(); TC.audit(st, '서명 키 재발급'); });
+    if (!await TC.confirm('Channel Secret 재발급', '재발급 즉시 새 값으로 서명합니다. 수신 서버의 검증 값을 먼저 바꿀 준비를 해 주세요.', '재발급', true)) return;
+    TC.update(st => { st.webhook.secret = TC.newChannelSecret(); TC.audit(st, 'Channel Secret 재발급'); });
     viewWebhook();
   };
   TC.$('#send').onclick = async () => {
     const btn = TC.$('#send');
     btn.disabled = true; btn.textContent = '전송 중';
-    const r = await deliver(samplePayload(S(), TC.$('#evType').value));
+    const path = TC.$('#evType').value;
+    const r = await deliver(path, samplePayload(S(), path));
     viewWebhook();
     TC.$('#result').innerHTML = `<div class="notice ${r.ok ? 'ok' : 'err'}"><b>${r.code}</b> ${r.ms}ms ${r.note ? '<br><span class="small">' + r.note + '</span>' : ''}</div>`;
   };
@@ -493,9 +510,7 @@ function viewWebhook() {
   });
   TC.$$('[data-redo]').forEach(b => b.onclick = async () => {
     const d = S().deliveries.find(x => x.id === b.dataset.redo);
-    const p = JSON.parse(d.body);
-    p.id = 'evt_' + TC.rand(20);
-    await deliver(p);
+    await deliver(d.event, JSON.parse(d.body));
     viewWebhook();
   });
 }
@@ -523,8 +538,8 @@ function viewUsage() {
     </div>
     <h3 style="margin-top:24px">채널별</h3>
     <div class="table-wrap"><table>
-      <tr><th>채널</th><th>환경</th><th>이번 달 상담방</th><th>어제</th></tr>
-      ${chans.map(c => { const u = c.usage || []; return `<tr><td>${TC.esc(c.searchId)}</td><td>${envBadge(c.env)}</td><td>${TC.num(u.reduce((a, d) => a + d.rooms, 0))}</td><td>${u.length > 1 ? u[u.length - 2].rooms : 0}</td></tr>`; }).join('') || '<tr><td colspan="4" class="muted">없음</td></tr>'}
+      <tr><th>채널</th><th class="c">환경</th><th class="r">이번 달 상담방</th><th class="r">어제</th></tr>
+      ${chans.map(c => { const u = c.usage || []; return `<tr><td>${TC.esc(c.searchId)}</td><td class="c">${envBadge(c.env)}</td><td class="r">${TC.num(u.reduce((a, d) => a + d.rooms, 0))}건</td><td class="r">${u.length > 1 ? u[u.length - 2].rooms : 0}건</td></tr>`; }).join('') || '<tr><td colspan="4" class="muted c">없음</td></tr>'}
     </table></div>
     <p class="muted small" style="margin-top:12px">과금 기준: 상담원(API)이 메시지를 보낸 세션 1개 = 1건. 같은 세션 안의 메시지 수와 무관하며 시스템 메시지와 발신 취소는 차감에 영향을 주지 않습니다.</p>`;
 }
@@ -561,8 +576,8 @@ function viewBilling() {
     </div>
     <h3 style="margin-top:24px">결제 내역</h3>
     <div class="table-wrap"><table>
-      <tr><th>일시</th><th>내용</th><th>금액</th><th>상태</th><th>영수증</th></tr>
-      ${b.history.length ? b.history.map(h => `<tr><td class="small">${TC.fmtDate(h.at)}</td><td>${h.desc}</td><td>${TC.won(h.amount)}</td><td><span class="badge ok">결제 완료</span></td><td><a href="javascript:void(0)" class="small">카드 영수증</a></td></tr>`).join('') : '<tr><td colspan="5" class="muted">결제 내역이 없습니다.</td></tr>'}
+      <tr><th class="c">일시</th><th>내용</th><th class="r">금액</th><th class="c">상태</th><th class="c">영수증</th></tr>
+      ${b.history.length ? b.history.map(h => `<tr><td class="c small nw">${TC.fmtDate(h.at)}</td><td>${h.desc}</td><td class="r">${TC.won(h.amount)}</td><td class="c"><span class="badge ok">결제 완료</span></td><td class="c"><a href="javascript:void(0)" class="small">카드 영수증</a></td></tr>`).join('') : '<tr><td colspan="5" class="muted c">결제 내역이 없습니다.</td></tr>'}
     </table></div>`;
 
   TC.$('#card').onclick = () => cardModal();
@@ -651,10 +666,10 @@ function viewSettings() {
 
 function viewAudit() {
   const s = S();
-  page.innerHTML = head('접근 이력', '키 발급·폐기, 서명 키 조회, 설정 변경 등 주요 작업 기록') + `
+  page.innerHTML = head('접근 이력', '토큰 발급·폐기, Channel Secret 조회, 설정 변경 등 주요 작업 기록') + `
     <div class="table-wrap"><table>
-      <tr><th>시각</th><th>사용자</th><th>작업</th><th>상세</th></tr>
-      ${s.audit.map(a => `<tr><td class="small">${TC.fmtDate(a.at)}</td><td class="small">${TC.esc(a.actor)}</td><td>${TC.esc(a.action)}</td><td class="small muted mono">${TC.esc(a.detail)}</td></tr>`).join('')}
+      <tr><th class="c">시각</th><th>사용자</th><th>작업</th><th>상세</th></tr>
+      ${s.audit.map(a => `<tr><td class="c small nw">${TC.fmtDate(a.at)}</td><td class="small">${TC.esc(a.actor)}</td><td>${TC.esc(a.action)}</td><td class="small muted mono">${TC.esc(a.detail)}</td></tr>`).join('')}
     </table></div>`;
 }
 

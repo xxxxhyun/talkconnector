@@ -98,15 +98,15 @@ function viewCustomers() {
   page.innerHTML = head('고객', '테스트 연장, Enterprise 예외 처리, 소진 차단 해제') + `
     <input type="text" id="q" placeholder="회사명, 사업자번호, 이메일 검색" style="margin-bottom:12px">
     <div class="table-wrap"><table id="t">
-      <tr><th>회사</th><th>사업자번호</th><th>로그인</th><th>요금제</th><th>사용량</th><th>상태</th><th></th></tr>
+      <tr><th>회사</th><th class="c">사업자번호</th><th class="c">로그인</th><th class="c">요금제</th><th class="r">사용량</th><th class="c">상태</th><th class="c">관리</th></tr>
       ${cs.map(c => `<tr data-q="${TC.esc((c.company + c.bizNo + c.email).toLowerCase())}">
         <td><b>${TC.esc(c.company)}</b>${c.reseller ? ' <span class="badge">재판매</span>' : ''}<div class="small muted">${TC.esc(c.email)}</div></td>
-        <td class="mono small">${c.bizNo}</td>
-        <td class="small">${c.provider === 'google' ? 'Google' : '카카오'}</td>
-        <td>${planName(c)}</td>
-        <td class="small">${c.quota ? `${TC.num(c.used)} / ${TC.num(c.quota)}<div class="meter ${c.used >= c.quota ? 'err' : c.used / c.quota >= .8 ? 'warn' : ''}" style="width:90px"><div style="width:${Math.min(100, c.used / c.quota * 100)}%"></div></div>` : `<span class="muted">테스트 ${c.used}</span>`}</td>
-        <td>${statusBadge(c)}</td>
-        <td><button class="btn sm" data-id="${c.id}">관리</button></td></tr>`).join('')}
+        <td class="c mono small nw">${c.bizNo}</td>
+        <td class="c small">${c.provider === 'google' ? 'Google' : '카카오'}</td>
+        <td class="c">${planName(c)}</td>
+        <td class="r small">${c.quota ? `${TC.num(c.used)} / ${TC.num(c.quota)}<div class="meter ${c.used >= c.quota ? 'err' : c.used / c.quota >= .8 ? 'warn' : ''}" style="width:90px;margin-left:auto"><div style="width:${Math.min(100, c.used / c.quota * 100)}%"></div></div>` : `<span class="muted">테스트 ${c.used}</span>`}</td>
+        <td class="c">${statusBadge(c)}</td>
+        <td class="c"><button class="btn sm" data-id="${c.id}">관리</button></td></tr>`).join('')}
     </table></div>`;
   TC.$('#q').oninput = e => {
     const q = e.target.value.trim().toLowerCase();
@@ -154,15 +154,15 @@ function viewChannels() {
   const s = TC.state();
   if (s) s.channels.forEach(ch => rows.push({ company: s.company.name, ...ch }));
   mem.customers.forEach((c, i) => {
-    for (let k = 0; k < c.channels; k++) rows.push({ company: c.company, id: 'ch_demo' + i + k, searchId: '@' + ['brand', 'shop', 'cs'][k] + (i + 1), env: c.plan ? 'live' : 'test', status: 'active', createdAt: c.createdAt });
+    for (let k = 0; k < c.channels; k++) rows.push({ company: c.company, senderKey: (String(i) + k).padEnd(40, '7c2e9a41'), searchId: '@' + ['brand', 'shop', 'cs'][k] + (i + 1), env: c.plan ? 'live' : 'test', status: 'active', createdAt: c.createdAt });
   });
   page.innerHTML = head('채널', '고객사 채널과 카카오 발신프로필 연결 상태') + `
     <div class="table-wrap"><table>
-      <tr><th>고객</th><th>채널</th><th>채널 ID</th><th>환경</th><th>상태</th><th>연결일</th></tr>
-      ${rows.map(r => `<tr><td>${TC.esc(r.company)}</td><td>${TC.esc(r.searchId)}</td><td class="mono small">${r.id}</td>
-        <td>${r.env === 'live' ? '<span class="badge primary">운영</span>' : '<span class="badge warn">테스트</span>'}</td>
-        <td>${r.status === 'active' ? '<span class="badge ok">이용중</span>' : '<span class="badge">중지</span>'}</td>
-        <td class="small muted">${TC.fmtDate(r.createdAt, false)}</td></tr>`).join('')}
+      <tr><th>고객</th><th>채널</th><th>발신프로필 키</th><th class="c">환경</th><th class="c">상태</th><th class="c">연결일</th></tr>
+      ${rows.map(r => `<tr><td>${TC.esc(r.company)}</td><td>${TC.esc(r.searchId)}</td><td class="mono small">${TC.mask(r.senderKey)}</td>
+        <td class="c">${r.env === 'live' ? '<span class="badge primary">운영</span>' : '<span class="badge warn">테스트</span>'}</td>
+        <td class="c">${r.status === 'active' ? '<span class="badge ok">이용중</span>' : '<span class="badge">중지</span>'}</td>
+        <td class="c small nw">${TC.fmtDate(r.createdAt, false)}</td></tr>`).join('')}
     </table></div>`;
 }
 
@@ -177,9 +177,9 @@ function viewBilling() {
   page.innerHTML = head('과금 집계', '매일 04시 카카오 상담톡 세션 통계와 대조 후 확정') + `
     <div class="notice small">완료 기준: TalkConnector 집계와 카카오 통계가 일치해야 확정합니다. 차이가 있으면 확정을 보류하고 원인을 기록합니다.</div>
     <div class="table-wrap"><table>
-      <tr><th>집계일</th><th>TalkConnector 상담방</th><th>카카오 세션 통계</th><th>차이</th><th>상태</th></tr>
-      ${days.map(d => `<tr><td>${d.date}</td><td>${TC.num(d.tc)}</td><td>${TC.num(d.kakao)}</td><td>${d.kakao - d.tc}</td>
-        <td>${d.kakao === d.tc ? '<span class="badge ok">확정</span>' : '<span class="badge warn">확인 필요</span>'}</td></tr>`).join('')}
+      <tr><th class="c">집계일</th><th class="r">TalkConnector 상담방</th><th class="r">카카오 세션 통계</th><th class="r">차이</th><th class="c">상태</th></tr>
+      ${days.map(d => `<tr><td class="c nw">${d.date}</td><td class="r">${TC.num(d.tc)}</td><td class="r">${TC.num(d.kakao)}</td><td class="r">${d.kakao - d.tc}</td>
+        <td class="c">${d.kakao === d.tc ? '<span class="badge ok">확정</span>' : '<span class="badge warn">확인 필요</span>'}</td></tr>`).join('')}
     </table></div>
     <p class="muted small" style="margin-top:12px">세부 정산(카카오 원가, 재판매사 정산)은 내부 시스템에서 관리하며 이 공개 프로토타입에는 포함하지 않습니다.</p>`;
 }
@@ -188,16 +188,16 @@ function viewTrials() {
   const cs = allCustomers();
   page.innerHTML = head('무료 이력', '사업자번호 기준 1회. 같은 사업자번호로 재가입하면 무료 테스트가 적용되지 않습니다') + `
     <div class="table-wrap"><table>
-      <tr><th>사업자번호</th><th>회사</th><th>무료 시작</th><th>무료 종료</th><th>현재</th></tr>
-      ${cs.map(c => `<tr><td class="mono small">${c.bizNo}</td><td>${TC.esc(c.company)}</td><td class="small">${TC.fmtDate(c.createdAt, false)}</td><td class="small">${TC.fmtDate(c.trialEndsAt, false)}</td><td>${statusBadge(c)}</td></tr>`).join('')}
+      <tr><th class="c">사업자번호</th><th>회사</th><th class="c">무료 시작</th><th class="c">무료 종료</th><th class="c">현재</th></tr>
+      ${cs.map(c => `<tr><td class="c mono small nw">${c.bizNo}</td><td>${TC.esc(c.company)}</td><td class="c small nw">${TC.fmtDate(c.createdAt, false)}</td><td class="c small nw">${TC.fmtDate(c.trialEndsAt, false)}</td><td class="c">${statusBadge(c)}</td></tr>`).join('')}
     </table></div>`;
 }
 
 function viewAudit() {
   page.innerHTML = head('관리자 접근 이력', '고객 정보 조회와 모든 조치 기록') + `
     <div class="table-wrap"><table>
-      <tr><th>시각</th><th>관리자</th><th>작업</th><th>대상</th></tr>
-      ${mem.audit.map(a => `<tr><td class="small">${TC.fmtDate(a.at)}</td><td class="small">${a.actor}</td><td>${TC.esc(a.action)}</td><td class="small">${TC.esc(a.detail)}</td></tr>`).join('')}
+      <tr><th class="c">시각</th><th>관리자</th><th>작업</th><th>대상</th></tr>
+      ${mem.audit.map(a => `<tr><td class="c small nw">${TC.fmtDate(a.at)}</td><td class="small">${a.actor}</td><td>${TC.esc(a.action)}</td><td class="small">${TC.esc(a.detail)}</td></tr>`).join('')}
     </table></div>`;
 }
 

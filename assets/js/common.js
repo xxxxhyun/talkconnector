@@ -32,25 +32,30 @@ TC.rand = (len, alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
 };
 TC.uuid = () => (crypto.randomUUID ? crypto.randomUUID() : TC.rand(8) + '-' + TC.rand(4) + '-' + TC.rand(4) + '-' + TC.rand(12));
 
-// Key formats: tc_test_ / tc_live_ (API key), whsec_ (webhook signing secret), ch_ (channel id)
-TC.newApiKey = env => `tc_${env}_${TC.rand(32)}`;
-TC.newSecret = () => `whsec_${TC.rand(32)}`;
+// Credentials follow the v3 gateway: sender_key (X-SenderKey, per channel),
+// API token (X-JwtToken, per account and environment), Channel Secret (verifies X-Signature on received requests).
+TC.HEX = '0123456789abcdef';
+TC.b64url = str => btoa(unescape(encodeURIComponent(str))).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+TC.newSenderKey = () => TC.rand(40, TC.HEX);
+TC.newApiToken = env => `${TC.b64url('{"typ":"JWT","alg":"HS256"}')}.${TC.b64url(JSON.stringify({ useMode: env === 'live' ? 'L' : 'T', companyId: TC.rand(10) }))}.${TC.rand(43, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_')}`;
+TC.newChannelSecret = () => TC.rand(32, TC.HEX);
 TC.newChannelId = () => `ch_${TC.rand(12, 'abcdefghijklmnopqrstuvwxyz0123456789')}`;
-TC.mask = k => {
-  if (!k) return '';
-  const prefix = k.slice(0, k.lastIndexOf('_') + 1);
-  return prefix + '••••••••' + k.slice(-4);
-};
+TC.mask = k => k ? k.slice(0, 8) + '••••••••' + k.slice(-4) : '';
 
-TC.hmacHex = async (secret, msg) => {
+TC.hmac = async (secret, msg) => {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(msg));
-  return Array.from(new Uint8Array(sig), b => b.toString(16).padStart(2, '0')).join('');
+  return new Uint8Array(await crypto.subtle.sign('HMAC', key, enc.encode(msg)));
+};
+// X-Signature: HS256 JWT whose claim is { jwtToken: <account API token> }, signed with the Channel Secret.
+TC.signature = async (secret, apiToken) => {
+  const unsigned = `${TC.b64url('{"typ":"JWT","alg":"HS256"}')}.${TC.b64url(JSON.stringify({ jwtToken: apiToken }))}`;
+  const sig = btoa(String.fromCharCode(...await TC.hmac(secret, unsigned))).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+  return `${unsigned}.${sig}`;
 };
 
 // ---------- store ----------
-const STORE_KEY = 'talkconnector.v1';
+const STORE_KEY = 'talkconnector.v2';
 
 TC.load = () => {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch { return null; }
@@ -84,7 +89,7 @@ TC.createAccount = ({ provider, name, email }) => {
     consents: null,
     channels: [],
     keys: [],
-    webhook: { url: '', secret: TC.newSecret(), events: ['message', 'session.started', 'session.ended', 'message.read', 'personal_info'], enabled: false },
+    webhook: { url: '', secret: TC.newChannelSecret(), seenInfo: false, enabled: false },
     deliveries: [],
     billing: { plan: null, card: null, autoRenew: true, history: [] },
     alerts: { at80: true, atZero: true, email: email },
