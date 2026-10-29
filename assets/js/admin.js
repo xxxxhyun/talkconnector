@@ -67,7 +67,8 @@ const statusBadge = c => ({
   blocked: '<span class="badge err">소진 중단</span>',
 }[c.status]);
 const planName = c => c.enterprise ? 'Enterprise' : c.plan ? TC.plan(c.plan).name : 'Free';
-const head = (t, d = '') => `<div class="page-head"><div><h1>${t}</h1>${d ? `<p>${d}</p>` : ''}</div></div>`;
+const head = (t, d = '') => `<div class="page-head"><div><span class="eyebrow">Admin</span><h1>${t}</h1>${d ? `<p>${d}</p>` : ''}</div></div>`;
+const stat = (icon, label, value, sub = '', style = '') => `<div class="card stat"><div class="label"><span class="stat-ic">${TC.icon(icon)}</span>${label}</div><div class="value" style="${style}">${value}</div>${sub ? `<div class="small muted">${sub}</div>` : ''}</div>`;
 
 function viewHome() {
   const cs = allCustomers();
@@ -78,17 +79,17 @@ function viewHome() {
   const trialEnding = cs.filter(c => c.status === 'trial' && c.trialEndsAt > Date.now() && c.trialEndsAt - Date.now() < 7 * 864e5);
   page.innerHTML = head('현황', '셀프서비스 고객 전체 요약') + `
     <div class="grid grid-4" style="margin-bottom:16px">
-      <div class="card stat"><div class="label">전체 고객</div><div class="value">${cs.length}</div><div class="small muted">무료 ${cs.filter(c => c.status === 'trial').length} · 유료 ${paying.length} · Enterprise ${cs.filter(c => c.enterprise).length}</div></div>
-      <div class="card stat"><div class="label">셀프 월 매출 (VAT 별도)</div><div class="value">${TC.won(mrr)}</div></div>
-      <div class="card stat"><div class="label">80% 이상 사용</div><div class="value">${warn.length}</div></div>
-      <div class="card stat"><div class="label">소진 중단</div><div class="value" style="color:var(--err)">${blocked.length}</div></div>
+      ${stat('users', '전체 고객', cs.length, `무료 ${cs.filter(c => c.status === 'trial').length} · 유료 ${paying.length} · Enterprise ${cs.filter(c => c.enterprise).length}`)}
+      ${stat('card', '셀프 월 매출', TC.won(mrr), 'VAT 별도')}
+      ${stat('chart', '80% 이상 사용', warn.length, '영업 연락 대상')}
+      ${stat('ban', '소진 중단', blocked.length, '요금제 변경 전까지 발송 중단', 'color:var(--err)')}
     </div>
     <div class="grid grid-2">
       <div class="card"><h3>영업 연락 대상</h3>
-        ${[...blocked, ...warn].map(c => `<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span>${TC.esc(c.company)}</span><span class="spacer"></span><span class="small">${TC.num(c.used)}/${TC.num(c.quota)}</span>${statusBadge(c)}</div>`).join('') || '<p class="muted">없음</p>'}
+        ${[...blocked, ...warn].map(c => `<div class="check-row"><span>${TC.esc(c.company)}</span><span class="spacer"></span><span class="small mono">${TC.num(c.used)}/${TC.num(c.quota)}</span>${statusBadge(c)}</div>`).join('') || '<p class="muted">없음</p>'}
       </div>
       <div class="card"><h3>7일 안에 무료 테스트 종료</h3>
-        ${trialEnding.map(c => `<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span>${TC.esc(c.company)}</span><span class="spacer"></span><span class="small muted">${TC.fmtDate(c.trialEndsAt, false)}</span></div>`).join('') || '<p class="muted">없음</p>'}
+        ${trialEnding.map(c => `<div class="check-row"><span>${TC.esc(c.company)}</span><span class="spacer"></span><span class="small muted mono">${TC.fmtDate(c.trialEndsAt, false)}</span></div>`).join('') || '<p class="muted">없음</p>'}
       </div>
     </div>`;
 }
@@ -175,9 +176,9 @@ function viewBilling() {
     days.push({ date: TC.fmtDate(d, false), tc, kakao: tc + diff });
   }
   page.innerHTML = head('과금 집계', '매일 04시 카카오 상담톡 세션 통계와 대조 후 확정') + `
-    <div class="notice small">완료 기준: TalkConnector 집계와 카카오 통계가 일치해야 확정합니다. 차이가 있으면 확정을 보류하고 원인을 기록합니다.</div>
+    <div class="notice small">완료 기준: 톡커넥터 집계와 카카오 통계가 일치해야 확정합니다. 차이가 있으면 확정을 보류하고 원인을 기록합니다.</div>
     <div class="table-wrap"><table>
-      <tr><th class="c">집계일</th><th class="r">TalkConnector 상담방</th><th class="r">카카오 세션 통계</th><th class="r">차이</th><th class="c">상태</th></tr>
+      <tr><th class="c">집계일</th><th class="r">톡커넥터 상담방</th><th class="r">카카오 세션 통계</th><th class="r">차이</th><th class="c">상태</th></tr>
       ${days.map(d => `<tr><td class="c nw">${d.date}</td><td class="r">${TC.num(d.tc)}</td><td class="r">${TC.num(d.kakao)}</td><td class="r">${d.kakao - d.tc}</td>
         <td class="c">${d.kakao === d.tc ? '<span class="badge ok">확정</span>' : '<span class="badge warn">확인 필요</span>'}</td></tr>`).join('')}
     </table></div>
